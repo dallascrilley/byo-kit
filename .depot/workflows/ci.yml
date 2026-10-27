@@ -16,6 +16,8 @@ on:
       - "example/**"
       - "tools/**"
       - "templates/**"
+      - "schemas/**"
+      - "examples/**"
       - "scripts/**"
       - "script/**"
       - "dist/**"
