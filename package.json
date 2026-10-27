@@ -1,0 +1,24 @@
+{
+  "name": "byo-kit",
+  "version": "0.1.0",
+  "description": "Add 'bring your own data' and 'bring your own key' to a static demo. Processed in the browser, keys never stored.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Dallas Crilley",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "main": "dist/byo-kit.js",
+  "module": "dist/byo-kit.js",
+  "exports": {
+    ".": "./dist/byo-kit.js",
+    "./src": "./src/index.js",
+    "./relay": "./relay/index.js"
+  },
+  "files": ["dist", "src", "relay", "templates", "tools"],
+  "scripts": {
+    "test": "node --test",
+    "build": "node scripts/bundle.mjs",
+    "serve": "node tools/static-server.mjs . 8787",
+    "cibuild": "script/cibuild"
+  }
+}

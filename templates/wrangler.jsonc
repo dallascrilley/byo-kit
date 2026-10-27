@@ -1,0 +1,25 @@
+// Cloudflare Workers: static assets, plus the optional relay.
+//
+// Static only (no relay, no provider that needs one):
+//   delete "main", "run_worker_first" and the "binding" line, and delete worker.js.
+// With the relay: keep everything. Assets are served directly; the Worker runs
+// only for the paths listed in "run_worker_first".
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "{{project}}",
+  "compatibility_date": "2026-10-01",
+
+  "main": "worker.js",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+
+  // Extra browser origins that may call the relay, comma separated. Leave empty
+  // for same origin only (the default and the safest).
+  "vars": { "ALLOWED_ORIGINS": "" },
+
+  // Nothing about requests is kept by the relay, so there is nothing to observe.
+  "observability": { "enabled": false }
+}

@@ -1,0 +1,10 @@
+#!/bin/sh
+# The whole CI gate, runnable anywhere. Keep it small and fast.
+set -eu
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+node --version
+node --test
+# Optional headless smoke of the page. Skips itself when Playwright is missing.
+if [ -f script/smoke.mjs ]; then node script/smoke.mjs; fi
+echo "cibuild: ok"

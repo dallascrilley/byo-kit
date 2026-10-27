@@ -1,0 +1,22 @@
+# CI runs on Depot CI: the canonical workflow is .depot/workflows/ci.yml.
+# GitHub-hosted runners are not used for this repository. This stub keeps the
+# workflow name discoverable and never runs on its own.
+#
+#   on demand : depot ci run --workflow .depot/workflows/ci.yml
+#   local     : script/cibuild
+name: ci
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  moved-to-depot-ci:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - run: |
+          echo "This gate runs on Depot CI from .depot/workflows/ci.yml."
+          echo "Local fallback: script/cibuild"
+          exit 1

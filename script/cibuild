@@ -1,0 +1,14 @@
+#!/bin/sh
+# The whole CI gate, runnable anywhere: check the bundle is current, run the
+# unit tests, then a headless smoke of the example page when Playwright and
+# Chrome are available (it says so and skips when they are not).
+#
+#   NODE_PATH=/path/to/node_modules script/cibuild     # include the browser smoke
+set -eu
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+node --version
+node scripts/bundle.mjs --check
+node --test
+node script/smoke.mjs
+echo "cibuild: ok"

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>byo-kit · column profiler</title>
+<meta name="description" content="Drop a CSV, JSON or NDJSON file and see its columns. Processed in your browser. Add your own API key to have a model describe it.">
+<link rel="stylesheet" href="styles.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar">
+    <div class="logo"><span class="mark" aria-hidden="true">b</span>byo-kit</div>
+    <h1 class="title">Profile a dataset without uploading it</h1>
+    <div class="pill">NO UPLOAD</div>
+  </header>
+
+  <main class="grid">
+    <div class="stack">
+      <section aria-labelledby="t-data">
+        <h2 class="eyebrow" id="t-data">1 · Bring your data</h2>
+        <byo-data id="data" sample-url="sample.csv"></byo-data>
+      </section>
+
+      <section aria-labelledby="t-key">
+        <h2 class="eyebrow" id="t-key">2 · Bring your key (optional)</h2>
+        <div class="pick">
+          <label for="provider">Provider</label>
+          <select id="provider">
+            <option value="anthropic">Anthropic</option>
+            <option value="openai">OpenAI</option>
+          </select>
+          <label for="model">Model</label>
+          <input id="model" type="text" spellcheck="false" autocomplete="off">
+        </div>
+        <byo-key id="key" provider="anthropic"></byo-key>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="t-cols">
+      <div class="card-head">
+        <h2 id="t-cols">Columns</h2>
+        <small id="summary">Load data to see its columns.</small>
+        <button class="btn" id="export" type="button" disabled>Download profile (CSV)</button>
+      </div>
+      <div id="empty" class="empty">Nothing loaded yet. Use the sample data to try it.</div>
+      <div class="scroll" id="table-wrap" hidden>
+        <table id="cols">
+          <thead><tr><th scope="col">Column</th><th scope="col">Type</th><th scope="col">Filled</th><th scope="col">Unique</th><th scope="col">Range</th><th scope="col">Most common</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="ai">
+        <div class="row">
+          <button class="btn primary" id="describe" type="button" disabled>Describe this dataset</button>
+          <span class="hint" id="describe-hint">Needs data and a key. Sends column names, types and counts only. No rows.</span>
+        </div>
+        <p class="answer" id="answer" role="status" aria-live="polite"></p>
+        <p class="net" id="net"></p>
+      </div>
+    </section>
+  </main>
+
+</div>
+</body>
+</html>

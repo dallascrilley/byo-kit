@@ -1,0 +1,121 @@
+ticket_id,opened,channel,priority,hours_to_resolve,satisfaction,customer,note
+1001,2026-10-12,chat,high,5.8,,Litware,Billing question
+1002,2026-09-05,phone,low,11.2,3,Tailspin,Printer offline
+1003,2026-09-09,web form,high,19.6,,Northwind,-5% discount requested
+1004,2026-10-12,phone,high,25.1,5,Contoso,
+1005,2026-10-26,email,normal,22.0,2,Fabrikam,Laptop replacement
+1006,2026-09-27,email,high,28.4,4,Tailspin,Password reset
+1007,2026-09-06,email,normal,0.5,5,Tailspin,"""Needs update, ASAP"""
+1008,2026-09-06,web form,urgent,1.9,2,Fabrikam,Billing question
+1009,2026-10-22,phone,high,26.4,,Northwind,Laptop replacement
+1010,2026-09-19,web form,high,19.1,3,Litware,Password reset
+1011,2026-10-08,web form,urgent,11.6,3,Tailspin,Laptop replacement
+1012,2026-09-11,chat,normal,28.7,1,Fabrikam,Laptop replacement
+1013,2026-09-01,web form,high,4.1,4,Litware,Billing question
+1014,2026-10-23,email,low,12.1,2,Tailspin,VPN drops hourly
+1015,2026-10-11,chat,low,25.8,1,Contoso,Billing question
+1016,2026-09-22,phone,urgent,34.6,,Litware,Laptop replacement
+1017,2026-09-27,web form,low,4.4,1,Northwind,Billing question
+1018,2026-09-06,email,low,20.1,2,Adatum,Printer offline
+1019,2026-10-26,web form,urgent,3.7,3,Contoso,-5% discount requested
+1020,2026-09-22,web form,high,15.2,4,Tailspin,
+1021,2026-09-18,chat,high,20.1,4,Contoso,Printer offline
+1022,2026-10-13,web form,urgent,1.7,2,Adatum,
+1023,2026-09-10,web form,urgent,16.8,4,Tailspin,-5% discount requested
+1024,2026-10-26,web form,normal,1.7,4,Tailspin,-5% discount requested
+1025,2026-09-21,email,low,10.4,5,Adatum,Billing question
+1026,2026-09-11,email,normal,3.8,4,Contoso,Password reset
+1027,2026-09-14,web form,high,8.7,3,Fabrikam,
+1028,2026-09-07,phone,urgent,8.6,,Northwind,
+1029,2026-09-09,chat,high,0.9,1,Tailspin,Billing question
+1030,2026-09-25,phone,high,7.8,,Adatum,Printer offline
+1031,2026-09-13,chat,urgent,13.0,2,Tailspin,"""Needs update, ASAP"""
+1032,2026-09-08,phone,low,19.4,5,Fabrikam,-5% discount requested
+1033,2026-10-07,phone,high,8.8,3,Adatum,VPN drops hourly
+1034,2026-09-17,email,normal,0.9,2,Contoso,"""Needs update, ASAP"""
+1035,2026-09-12,phone,low,15.0,,Northwind,Laptop replacement
+1036,2026-10-19,chat,normal,1.7,4,Fabrikam,Password reset
+1037,2026-09-12,phone,normal,11.2,,Adatum,-5% discount requested
+1038,2026-10-12,email,high,18.9,2,Contoso,Billing question
+1039,2026-09-18,chat,urgent,5.4,2,Litware,VPN drops hourly
+1040,2026-09-27,chat,low,6.5,4,Adatum,
+1041,2026-10-16,chat,normal,4.2,4,Adatum,VPN drops hourly
+1042,2026-10-09,email,urgent,8.0,5,Fabrikam,-5% discount requested
+1043,2026-09-27,chat,high,25.9,5,Tailspin,Billing question
+1044,2026-10-03,chat,urgent,15.8,1,Northwind,
+1045,2026-09-26,chat,high,29.3,2,Fabrikam,
+1046,2026-09-12,email,normal,2.0,3,Litware,Password reset
+1047,2026-09-01,web form,normal,4.2,5,Fabrikam,Laptop replacement
+1048,2026-09-23,phone,urgent,19.1,5,Adatum,"""Needs update, ASAP"""
+1049,2026-09-21,web form,high,2.5,1,Adatum,"""Needs update, ASAP"""
+1050,2026-10-01,chat,urgent,33.7,5,Fabrikam,"""Needs update, ASAP"""
+1051,2026-09-02,chat,low,5.8,5,Contoso,-5% discount requested
+1052,2026-09-16,chat,normal,2.2,3,Northwind,Password reset
+1053,2026-09-11,chat,low,6.6,3,Contoso,Printer offline
+1054,2026-10-04,chat,urgent,0.9,,Northwind,-5% discount requested
+1055,2026-09-04,phone,normal,16.7,3,Fabrikam,Password reset
+1056,2026-10-19,web form,high,1.1,5,Adatum,Printer offline
+1057,2026-09-21,web form,low,9.7,,Fabrikam,Laptop replacement
+1058,2026-10-10,chat,low,6.2,3,Adatum,Password reset
+1059,2026-09-04,web form,low,4.7,2,Fabrikam,-5% discount requested
+1060,2026-10-21,email,normal,6.3,4,Tailspin,Password reset
+1061,2026-10-19,chat,high,3.9,1,Fabrikam,Laptop replacement
+1062,2026-09-24,email,urgent,12.7,5,Adatum,
+1063,2026-10-22,phone,low,9.3,5,Contoso,Password reset
+1064,2026-10-19,web form,high,13.0,1,Fabrikam,"""Needs update, ASAP"""
+1065,2026-10-08,email,high,1.4,,Tailspin,Password reset
+1066,2026-09-05,email,high,18.2,4,Tailspin,VPN drops hourly
+1067,2026-10-25,phone,high,18.1,3,Adatum,
+1068,2026-10-15,chat,high,5.2,4,Tailspin,
+1069,2026-10-07,web form,low,0.6,1,Northwind,-5% discount requested
+1070,2026-10-18,email,urgent,28.2,1,Litware,Laptop replacement
+1071,2026-10-10,email,normal,7.0,3,Contoso,Printer offline
+1072,2026-10-03,phone,high,7.9,4,Adatum,Password reset
+1073,2026-10-14,phone,low,6.6,1,Adatum,Password reset
+1074,2026-09-16,web form,normal,9.4,,Litware,Billing question
+1075,2026-10-06,phone,high,5.2,4,Northwind,Billing question
+1076,2026-09-01,web form,urgent,20.3,1,Northwind,VPN drops hourly
+1077,2026-10-08,chat,normal,19.2,,Contoso,Laptop replacement
+1078,2026-09-16,chat,urgent,22.9,5,Tailspin,Printer offline
+1079,2026-10-14,web form,high,19.0,5,Fabrikam,Billing question
+1080,2026-09-18,email,urgent,34.6,3,Adatum,
+1081,2026-10-21,email,high,1.4,2,Fabrikam,-5% discount requested
+1082,2026-09-22,chat,high,8.4,1,Fabrikam,-5% discount requested
+1083,2026-10-14,phone,high,14.8,,Contoso,Laptop replacement
+1084,2026-10-25,chat,urgent,0.5,2,Contoso,-5% discount requested
+1085,2026-10-21,phone,low,5.2,,Adatum,Printer offline
+1086,2026-09-10,chat,normal,2.1,5,Litware,Printer offline
+1087,2026-10-13,web form,low,28.8,2,Fabrikam,Printer offline
+1088,2026-10-15,email,normal,26.2,,Northwind,"""Needs update, ASAP"""
+1089,2026-09-30,email,urgent,3.0,2,Northwind,Printer offline
+1090,2026-10-11,phone,urgent,2.8,,Fabrikam,
+1091,2026-09-20,web form,low,5.1,1,Fabrikam,Laptop replacement
+1092,2026-10-23,chat,normal,1.3,,Tailspin,
+1093,2026-10-11,web form,low,7.2,2,Litware,-5% discount requested
+1094,2026-09-16,email,high,5.9,2,Fabrikam,Printer offline
+1095,2026-10-24,chat,normal,2.2,,Fabrikam,-5% discount requested
+1096,2026-10-14,web form,normal,10.5,2,Adatum,
+1097,2026-09-10,phone,high,40.2,2,Contoso,"""Needs update, ASAP"""
+1098,2026-10-21,chat,normal,26.3,3,Northwind,Password reset
+1099,2026-09-09,web form,low,4.0,1,Fabrikam,Billing question
+1100,2026-09-20,chat,normal,11.1,4,Northwind,-5% discount requested
+1101,2026-10-26,phone,low,5.3,,Litware,Billing question
+1102,2026-10-02,email,urgent,20.0,2,Northwind,Laptop replacement
+1103,2026-09-07,chat,urgent,2.5,1,Fabrikam,Printer offline
+1104,2026-10-14,email,urgent,17.2,3,Litware,VPN drops hourly
+1105,2026-09-03,phone,normal,9.2,,Contoso,
+1106,2026-09-21,email,urgent,2.1,1,Litware,VPN drops hourly
+1107,2026-09-24,email,urgent,0.9,1,Contoso,"""Needs update, ASAP"""
+1108,2026-09-30,email,low,26.9,4,Northwind,Laptop replacement
+1109,2026-09-29,chat,normal,1.2,,Adatum,Printer offline
+1110,2026-09-09,email,high,8.4,1,Fabrikam,"""Needs update, ASAP"""
+1111,2026-10-07,phone,urgent,32.9,,Northwind,Printer offline
+1112,2026-09-22,email,high,35.0,,Contoso,Laptop replacement
+1113,2026-10-06,chat,urgent,17.2,,Tailspin,VPN drops hourly
+1114,2026-10-13,email,normal,12.8,1,Litware,
+1115,2026-09-13,email,high,1.4,3,Tailspin,Laptop replacement
+1116,2026-10-01,chat,urgent,13.4,5,Adatum,VPN drops hourly
+1117,2026-09-24,web form,high,0.9,5,Tailspin,VPN drops hourly
+1118,2026-10-12,web form,urgent,16.3,5,Tailspin,
+1119,2026-10-03,phone,urgent,5.2,3,Fabrikam,-5% discount requested
+1120,2026-10-26,email,normal,3.0,3,Adatum,VPN drops hourly
