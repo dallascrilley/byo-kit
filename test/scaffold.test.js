@@ -131,7 +131,18 @@ test('release verification updates ignored receipts and reaches the GitHub push 
     assert.equal(run([git, 'config', 'user.email', 'scaffold-test@example.invalid'], out).status, 0);
     assert.equal(run([git, 'add', '-A'], out).status, 0);
     assert.equal(run([git, 'commit', '-m', 'test verified release'], out).status, 0);
-    const result = run(['scripts/release.mjs', '--publish', '--verify', '--repo', 'example/priority-tool'], out, undefined, { PATH: `${bin}:${process.env.PATH}`, BYO_PUSH_LOG: pushLog });
+    const release = ['scripts/release.mjs', '--publish', '--verify', '--repo', 'example/priority-tool'];
+    const releaseEnv = { PATH: `${bin}:${process.env.PATH}`, BYO_PUSH_LOG: pushLog };
+    for (const remote of ['https://evil.example/prefix/example/priority-tool', 'https://github.com/mirror/example/priority-tool']) {
+      assert.equal(run([git, 'remote', 'add', 'origin', remote], out).status, 0);
+      const rejected = run(release, out, undefined, releaseEnv);
+      assert.notEqual(rejected.status, 0);
+      assert.match(rejected.stderr, /exact GitHub repository/);
+      assert.equal(existsSync(pushLog), false);
+      assert.equal(run([git, 'remote', 'remove', 'origin'], out).status, 0);
+    }
+    assert.equal(run([git, 'remote', 'add', 'origin', 'git@github.com:example/priority-tool.git'], out).status, 0);
+    const result = run(release, out, undefined, releaseEnv);
     assert.equal(result.status, 0, result.stdout + result.stderr);
     assert.match(readFileSync(pushLog, 'utf8'), /push -u origin HEAD/);
     assert.equal(JSON.parse(readFileSync(join(out, 'release-receipt.json'), 'utf8')).github.url, 'https://github.com/example/priority-tool');

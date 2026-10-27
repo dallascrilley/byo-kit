@@ -1,11 +1,12 @@
-Fresh generated web project browser-flow smoke (final generator).
+Fresh generated-project visual and browser-flow smoke after compact responsive layout.
 Manifest: examples/concept.json
+Capture viewport: 1280x800.
 
-$ node scripts/byo.mjs scaffold examples/concept.json --out /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden
-scaffold: /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden
-measured scaffold time: 24 ms (generation only; 20-minute workflow is a target)
+$ node scripts/byo.mjs scaffold examples/concept.json --out /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-layout-smoke-qku_p3f2/signal-garden
+scaffold: /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-layout-smoke-qku_p3f2/signal-garden
+measured scaffold time: 7 ms (generation only; 20-minute workflow is a target)
 
-$ node scripts/byo.mjs check /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden
+$ node scripts/byo.mjs check /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-layout-smoke-qku_p3f2/signal-garden
 check: signal-garden manifest and generic handoff are valid
 
 $ npm run demo
@@ -13,9 +14,9 @@ $ npm run demo
 > signal-garden@0.1.0 demo
 > node tools/record-demo.mjs --serve public --steps docs/demo-steps.json --out docs/demo.gif --max-seconds 9
 
-record-demo: wrote /private/var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden/docs/demo.gif
-  duration 1.83 s (limit 9 s), 0.19 MB, 960 px wide at 12 fps
-  final frame /private/var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden/docs/demo-final.png (1280x800)
+record-demo: wrote /private/var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-layout-smoke-qku_p3f2/signal-garden/docs/demo.gif
+  duration 2.08 s (limit 9 s), 0.51 MB, 960 px wide at 12 fps
+  final frame /private/var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-layout-smoke-qku_p3f2/signal-garden/docs/demo-final.png (1280x800)
 
 $ npm run verify
 
@@ -23,8 +24,8 @@ $ npm run verify
 > node scripts/verify.mjs
 
 browser smoke: sample 3 rows and local paste 1 row match the implemented standout API; 0 network requests while processing
-✔ standout API preserves each input row and returns a result explanation (1.260916ms)
-✔ feature acceptance ranks West above North and South (0.109417ms)
+✔ standout API preserves each input row and returns a result explanation (0.498042ms)
+✔ feature acceptance ranks West above North and South (0.079625ms)
 ℹ tests 2
 ℹ suites 0
 ℹ pass 2
@@ -32,10 +33,10 @@ browser smoke: sample 3 rows and local paste 1 row match the implemented standou
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 311.38125
-verify: behavior, privacy, browser flow and short GIF passed; source sha256 c9c02f7071ba72940bd4d84aa8b43d5e02bc014f1621aba26d57bf11d515ffe6
+ℹ duration_ms 54.656916
+verify: behavior, privacy, browser flow and short GIF passed; source sha256 f7475c3b6e5dc7b5864fb13e8213c0ab6007cb8147a6b2a4b2195009e4822382
 
-Measured scaffold-to-feature-to-demo-to-verification elapsed: 13033 ms. The manifest included prior-art references; no fresh opportunity research or application submission occurred during this smoke. The 20-minute phases remain targets, not measurements.
+Measured scaffold-to-feature-to-demo-to-verification elapsed: 4634 ms. Prior-art references were present in the manifest; no fresh research or application submission occurred in this smoke.
 
-GIF duration: 1.830000 seconds.
-Temporary generated project: /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden
+GIF duration: 2.080000 seconds.
+Generated project and final frame: /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-layout-smoke-qku_p3f2/signal-garden

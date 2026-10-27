@@ -4,6 +4,10 @@ import { spawnSync } from 'node:child_process';
 const argv = process.argv.slice(2);
 const flags = new Set(argv.filter((item) => item.startsWith('--')));
 function option(name) { const index = argv.indexOf(name); return index < 0 ? null : argv[index + 1] || null; }
+function githubSlug(remote) {
+  const match = remote.match(/^(?:https:\/\/github\.com\/|git@github\.com:|ssh:\/\/git@github\.com\/)([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+?)(?:\.git)?\/?$/i);
+  return match?.[1].toLowerCase() || null;
+}
 function run(command, args, capture = false) {
   const result = spawnSync(command, args, { encoding: 'utf8', stdio: capture ? 'pipe' : 'inherit' });
   if (capture && result.stdout) process.stdout.write(result.stdout);
@@ -27,13 +31,13 @@ const receipt = existsSync(receiptPath) ? JSON.parse(readFileSync(receiptPath, '
 if (publish) {
   const repoInput = option('--repo');
   if (!repoInput) throw new Error('--publish requires --repo OWNER/REPO or a GitHub repository URL. Create the repository first.');
-  const match = repoInput.match(/^(?:https:\/\/github\.com\/)?([^/]+\/[^/]+?)(?:\.git)?\/?$/);
+  const match = repoInput.match(/^(?:https:\/\/github\.com\/)?([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+?)(?:\.git)?\/?$/i);
   if (!match) throw new Error('Repository must be OWNER/REPO or https://github.com/OWNER/REPO.');
   const slug = match[1]; const url = `https://github.com/${slug}`; const remoteUrl = `https://github.com/${slug}.git`;
   if (!existsSync('.git')) throw new Error('Initialize Git and commit the reviewed public project files before publishing.');
   const currentRemote = spawnSync('git', ['remote', 'get-url', 'origin'], { encoding: 'utf8' });
   if (currentRemote.status !== 0) git(['remote', 'add', 'origin', remoteUrl]);
-  else if (!currentRemote.stdout.trim().replace(/\.git$/, '').endsWith(slug)) throw new Error('origin does not match --repo; refusing to push to another repository.');
+  else if (githubSlug(currentRemote.stdout.trim()) !== slug.toLowerCase()) throw new Error('origin is not the exact GitHub repository from --repo; refusing to push to another host or path.');
   if (git(['status', '--porcelain'])) throw new Error('Commit or discard the reviewed working-tree changes before publishing. The release script never stages files.');
   if (!git(['rev-parse', 'HEAD'])) throw new Error('A reviewed commit is required before publishing.');
   git(['push', '-u', 'origin', 'HEAD']);
