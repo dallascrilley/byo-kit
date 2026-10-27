@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://byo-kit.invalid/schemas/concept.schema.json",
+  "title": "BYO Kit concept manifest",
+  "description": "A portable, pre-researched project concept accepted by the byo-kit scaffold CLI.",
+  "type": "object",
+  "required": ["problem", "user", "standout", "demo_steps"],
+  "anyOf": [{ "required": ["name"] }, { "required": ["title"] }],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "problem": { "type": "string", "minLength": 1 },
+    "user": { "type": "string", "minLength": 1 },
+    "standout": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "object", "required": ["name", "description"], "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 }
+        }, "additionalProperties": true }
+      ]
+    },
+    "demo_steps": { "type": "array", "minItems": 1, "items": { "oneOf": [
+      { "type": "string", "minLength": 1 },
+      { "type": "object", "minProperties": 1 }
+    ] } },
+    "kind": { "enum": ["web", "cli", "library"] },
+    "ai": { "type": "boolean", "default": false },
+    "prior_art": {
+      "type": "object",
+      "required": ["decision", "references", "rationale"],
+      "properties": {
+        "decision": { "enum": ["extend", "contribute", "wrap", "new"] },
+        "references": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "rationale": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "description": { "type": "string" },
+    "sample_data": { "type": "array", "items": { "type": "object" } },
+    "features": { "type": "array", "items": { "type": "string" } },
+    "openrouter": { "type": "boolean", "default": false }
+  },
+  "additionalProperties": true
+}

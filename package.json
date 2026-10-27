@@ -14,7 +14,7 @@
     "./src": "./src/index.js",
     "./relay": "./relay/index.js"
   },
-  "files": ["dist", "src", "relay", "templates", "tools"],
+  "files": ["dist", "src", "relay", "templates", "tools", "scripts", "schemas", "examples"],
   "scripts": {
     "test": "node --test",
     "build": "node scripts/bundle.mjs",

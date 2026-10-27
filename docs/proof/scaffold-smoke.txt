@@ -1,0 +1,41 @@
+Fresh generated web project browser-flow smoke (final generator).
+Manifest: examples/concept.json
+
+$ node scripts/byo.mjs scaffold examples/concept.json --out /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden
+scaffold: /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden
+measured scaffold time: 24 ms (generation only; 20-minute workflow is a target)
+
+$ node scripts/byo.mjs check /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden
+check: signal-garden manifest and generic handoff are valid
+
+$ npm run demo
+
+> signal-garden@0.1.0 demo
+> node tools/record-demo.mjs --serve public --steps docs/demo-steps.json --out docs/demo.gif --max-seconds 9
+
+record-demo: wrote /private/var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden/docs/demo.gif
+  duration 1.83 s (limit 9 s), 0.19 MB, 960 px wide at 12 fps
+  final frame /private/var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden/docs/demo-final.png (1280x800)
+
+$ npm run verify
+
+> signal-garden@0.1.0 verify
+> node scripts/verify.mjs
+
+browser smoke: sample 3 rows and local paste 1 row match the implemented standout API; 0 network requests while processing
+✔ standout API preserves each input row and returns a result explanation (1.260916ms)
+✔ feature acceptance ranks West above North and South (0.109417ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 311.38125
+verify: behavior, privacy, browser flow and short GIF passed; source sha256 c9c02f7071ba72940bd4d84aa8b43d5e02bc014f1621aba26d57bf11d515ffe6
+
+Measured scaffold-to-feature-to-demo-to-verification elapsed: 13033 ms. The manifest included prior-art references; no fresh opportunity research or application submission occurred during this smoke. The 20-minute phases remain targets, not measurements.
+
+GIF duration: 1.830000 seconds.
+Temporary generated project: /var/folders/d8/hsqwq3y13x73fl_q2ht3fhp40000gn/T/byo-kit-release-smoke-v18kln81/signal-garden

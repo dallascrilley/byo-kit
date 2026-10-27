@@ -35,6 +35,56 @@ Most demos either ship canned data or ask visitors to trust a server with their 
 | `toCsv()` | CSV export that neutralizes spreadsheet formula injection. |
 | `tools/record-demo.mjs` | Records a README GIF of at most 10 seconds from a JSON step script. |
 | `templates/` | README, `wrangler.jsonc`, `worker.js`, and Depot CI files for the next project. |
+| `scripts/byo.mjs` | Scaffolds web, CLI, or library projects from a concept JSON file. |
+
+## Fast project path
+
+Start with a pre-researched concept in the shape described by
+[`schemas/concept.schema.json`](schemas/concept.schema.json). `name` or `title`,
+`problem`, `user`, `standout`, and `demo_steps` are accepted. Optional
+`prior_art` records references, a rationale, and one decision: `extend`,
+`contribute`, `wrap`, or `new`. The scaffold copies supplied concept fields; it
+does not infer novelty, usefulness, or research from missing terms.
+
+```sh
+node scripts/byo.mjs scaffold examples/concept.json --out /tmp/signal-garden
+cd /tmp/signal-garden
+export NODE_PATH=/path/to/node_modules  # existing Playwright install, if needed for browser proof
+npm run dev
+npm run demo
+npm test                  # intentionally fails until feature code and acceptance TODOs are replaced
+npm run verify            # requires implemented feature, browser flow, and <10s GIF
+```
+
+The default is a runnable local-first web app with sample JSON, local file/paste
+input through `<byo-data>`, an editable `public/src/standout.js` behavior hook,
+a deliberately failing concept-specific acceptance test, README and demo steps.
+Set `"kind": "cli"` or `"library"` for a Node starter with `--help`, `--json`,
+file/stdin input, a stable invalid-input exit code, and an exported `analyze`
+API. Generated projects include an MIT license.
+Set `"ai": true` (or `"openrouter": true`) only when the optional OpenRouter
+key component is wanted; the standout behavior remains useful without AI.
+
+The generated project includes `PROJECT_PLAN.md` for prior-art review,
+`portfolio-handoff.json` with public project metadata only, and
+`workflow-targets.json` with targets of 3 minutes concept/research, 10 build,
+4 proof/package, and 3 publish, application inclusion, and handoff. Those are
+targets, not a 20-minute guarantee. Count research in elapsed time if done
+during the run. Submission is never automated; record verified submission
+separately in private career records. `timing.json` and the generated handoff
+are ignored local receipts so verification cannot dirty a committed release.
+
+Create the GitHub repository with `gh-axi repo create OWNER/REPO --public`,
+review and commit only public files, then run
+`node scripts/release.mjs --publish --verify --repo OWNER/REPO`. Web projects
+deploy separately with `node scripts/release.mjs --deploy --verify`; optional
+npm publication uses `--npm`. Each action re-verifies first and writes an
+ignored local receipt with the GitHub repository/commit or Worker URL. A GitHub
+push alone does not prove CI, deployment, or application readiness. Afterward,
+check CI with `gh run list -R OWNER/REPO --limit 5`, watch the selected run with
+`gh run watch RUN_ID -R OWNER/REPO --exit-status`, and open or `curl -f` the
+Worker URL from the receipt. GitHub self-hosted Linux and Depot workflow
+templates are included.
 
 ## Bring your own data
 

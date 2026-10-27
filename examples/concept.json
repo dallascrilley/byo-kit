@@ -1,0 +1,26 @@
+{
+  "title": "Signal Garden",
+  "problem": "A small team cannot quickly spot which sample metrics need attention.",
+  "user": "An analyst reviewing a local CSV export",
+  "standout": {
+    "name": "Priority signal",
+    "description": "Rank each row by a transparent score and explain the top reason."
+  },
+  "demo_steps": [
+    "Open the app",
+    "Load the included sample",
+    "See the highest priority and its explanation"
+  ],
+  "kind": "web",
+  "ai": false,
+  "sample_data": [
+    { "name": "North", "value": 18, "baseline": 25 },
+    { "name": "West", "value": 31, "baseline": 27 },
+    { "name": "South", "value": 12, "baseline": 24 }
+  ],
+  "prior_art": {
+    "decision": "extend",
+    "references": ["byo-kit local-first data and demo components"],
+    "rationale": "Reuse the existing local data path and add the concept's distinct scoring behavior."
+  }
+}

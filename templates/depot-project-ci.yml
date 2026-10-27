@@ -1,0 +1,45 @@
+name: ci
+on:
+  push:
+    paths:
+      - "public/**"
+      - "src/**"
+      - "test/**"
+      - "script/**"
+      - "scripts/**"
+      - "tools/**"
+      - "schemas/**"
+      - "examples/**"
+      - "templates/**"
+      - "docs/**"
+      - "smoke.mjs"
+      - ".github/**"
+      - ".depot/**"
+      - "LICENSE"
+      - "README.md"
+      - "PROJECT_PLAN.md"
+      - "package.json"
+      - "wrangler.jsonc"
+      - "worker.js"
+      - "concept.json"
+      - "portfolio-handoff.json"
+      - "workflow-targets.json"
+      - "timing.json"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: script/cibuild
