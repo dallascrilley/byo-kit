@@ -54,6 +54,18 @@ test('web scaffold generates a runnable local-data app and generic handoff', () 
     assert.ok(readFileSync(join(out, 'script/cibuild'), 'utf8').includes('npm test'));
     const handoff = JSON.parse(readFileSync(join(out, 'portfolio-handoff.json'), 'utf8'));
     assert.equal(handoff.privacy, 'public project metadata only; no personal career data');
+    const page = readFileSync(join(out, 'public/index.html'), 'utf8');
+    const styles = readFileSync(join(out, 'public/styles.css'), 'utf8');
+    assert.doesNotMatch(page, /eyebrow|LOCAL-FIRST DEMO/i);
+    assert.match(page, /<header><h1>[^<]+<\/h1><p class="lede">/);
+    assert.match(page, /id="results" data-state="empty"/);
+    assert.match(readFileSync(join(out, 'public/app.js'), 'utf8'), /byo-data-error/);
+    assert.match(styles, /font: 16px\/1\.5 system-ui/);
+    assert.doesNotMatch(styles, /box-shadow|gradient|100vh|place-items:\s*center|letter-spacing/);
+    const review = readFileSync(join(out, 'docs/DESIGN_REVIEW.md'), 'utf8');
+    for (const phrase of [/skills\/unslop\/SKILL\.md/, /skills\/hallmark\/SKILL\.md/, /Employers and other reviewers read the README/, /does not\s+judge the design/, /320, 375, 768, and 1280 px/, /empty, ready, and error/]) assert.match(review, phrase);
+    assert.doesNotMatch(review, /@|\d{3}[-. ]\d{3}[-. ]\d{4}|salary:/i);
+    assert.match(readFileSync(join(out, 'README.md'), 'utf8'), /docs\/DESIGN_REVIEW\.md/);
     const verify = run(['npm', 'run', 'verify'], out);
     assert.notEqual(verify.status, 0);
     assert.match(verify.stderr, /Implement the concept standout/);
@@ -104,6 +116,9 @@ test('library scaffold includes a package API, bin, and portable license', () =>
     assert.equal(pkg.exports['.'], './src/index.js');
     assert.equal(pkg.bin['row-library'], './bin/cli.js');
     assert.ok(existsSync(join(out, 'LICENSE')));
+    const review = readFileSync(join(out, 'docs/DESIGN_REVIEW.md'), 'utf8');
+    assert.match(review, /## Prose review/);
+    assert.doesNotMatch(review, /Visual review/);
   } finally { rmSync(temp, { recursive: true, force: true }); }
 });
 
@@ -121,6 +136,15 @@ test('release verification updates ignored receipts and reaches the GitHub push 
     assert.notEqual(marker, -1);
     lines[marker] = "test('feature acceptance ranks West above North and South', () => { const rows = [{name:'North',value:18,baseline:25},{name:'West',value:31,baseline:27},{name:'South',value:12,baseline:24}]; const result = rankRows(rows); assert.equal(result[0].name, 'West'); assert.equal(result[0].score, 4); });";
     writeFileSync(acceptance, lines.join('\n'));
+    const reviewFile = join(out, 'docs/DESIGN_REVIEW.md');
+    const refused = run(['scripts/release.mjs', '--publish', '--verify', '--repo', 'example/priority-tool'], out);
+    assert.notEqual(refused.status, 0);
+    assert.match(refused.stderr, /Complete docs\/DESIGN_REVIEW\.md first/);
+    writeFileSync(reviewFile, readFileSync(reviewFile, 'utf8').replaceAll('- [ ]', '- [x]'));
+    const boxesOnly = run(['scripts/release.mjs', '--publish', '--verify', '--repo', 'example/priority-tool'], out);
+    assert.notEqual(boxesOnly.status, 0);
+    assert.match(boxesOnly.stderr, /replace every bracketed placeholder/);
+    writeFileSync(reviewFile, readFileSync(reviewFile, 'utf8').replace('[note or n/a]', 'n/a').replace('[name]', 'Test Author').replace('[YYYY-MM-DD]', '2026-01-01').replace('[list them, or write none]', 'none'));
     const git = spawnSync('which', ['git'], { encoding: 'utf8' }).stdout.trim();
     const bin = join(temp, 'bin'); mkdirSync(bin);
     const pushLog = join(temp, 'push.log'); const stub = join(bin, 'git');

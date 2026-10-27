@@ -65,6 +65,18 @@ API. Generated projects include an MIT license.
 Set `"ai": true` (or `"openrouter": true`) only when the optional OpenRouter
 key component is wanted; the standout behavior remains useful without AI.
 
+The generated web page is a working tool, not a landing page: a compact `h1`
+with a one-line description, a data panel beside a results panel, a system
+font, one accent, hairline rules, and empty, ready, and error result states
+(`#results[data-state]`). It has no promotional label, card shell, or shadow.
+Edit the tokens in `public/styles.css`; keep the layout roles unless the tool
+needs a different one. Each project also gets `docs/DESIGN_REVIEW.md`, an
+author checklist for the `unslop` prose pass (README and page text that
+employers read) and, for web projects, a `hallmark` audit of the rendered page
+at four widths. `scripts/release.mjs` refuses to run until every box is checked
+and every bracketed placeholder is replaced. That gate shows the review was
+done. It cannot tell whether the design or prose is good.
+
 The generated project includes `PROJECT_PLAN.md` for prior-art review,
 `portfolio-handoff.json` with public project metadata only, and
 `workflow-targets.json` with targets of 3 minutes concept/research, 10 build,
