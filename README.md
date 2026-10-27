@@ -70,12 +70,11 @@ with a one-line description, a data panel beside a results panel, a system
 font, one accent, hairline rules, and empty, ready, and error result states
 (`#results[data-state]`). It has no promotional label, card shell, or shadow.
 Edit the tokens in `public/styles.css`; keep the layout roles unless the tool
-needs a different one. Each project also gets `docs/DESIGN_REVIEW.md`, an
-author checklist for the `unslop` prose pass (README and page text that
-employers read) and, for web projects, a `hallmark` audit of the rendered page
-at four widths. `scripts/release.mjs` refuses to run until every box is checked
-and every bracketed placeholder is replaced. That gate shows the review was
-done. It cannot tell whether the design or prose is good.
+needs a different one. Each project also gets `docs/DESIGN_REVIEW.md`: apply
+`unslop` to all prose and `hallmark` to all visual design as working defaults.
+There is no separate stage-by-stage process or checkbox signoff. User-visible
+work still follows `project-journey-proof`, including actual visual inspection
+and fixing/rechecking visible defects.
 
 The generated project includes `PROJECT_PLAN.md` for prior-art review,
 `portfolio-handoff.json` with public project metadata only, and
