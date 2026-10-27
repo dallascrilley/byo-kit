@@ -63,7 +63,7 @@ test('web scaffold generates a runnable local-data app and generic handoff', () 
     assert.match(styles, /font: 16px\/1\.5 system-ui/);
     assert.doesNotMatch(styles, /box-shadow|gradient|100vh|place-items:\s*center|letter-spacing/);
     const review = readFileSync(join(out, 'docs/DESIGN_REVIEW.md'), 'utf8');
-    for (const phrase of [/skills\/unslop\/SKILL\.md/, /skills\/hallmark\/SKILL\.md/, /Employers and other reviewers read the README/, /does not\s+judge the design/, /320, 375, 768, and 1280 px/, /empty, ready, and error/]) assert.match(review, phrase);
+    for (const phrase of [/Applied the `unslop` skill/, /Applied the `hallmark` skill/, /Employers and other reviewers read the README/, /cannot prove the review happened or judge the design/, /320, 375, 414, 768, and 1280 px/, /empty, ready, and error/]) assert.match(review, phrase);
     assert.doesNotMatch(review, /@|\d{3}[-. ]\d{3}[-. ]\d{4}|salary:/i);
     assert.match(readFileSync(join(out, 'README.md'), 'utf8'), /docs\/DESIGN_REVIEW\.md/);
     const verify = run(['npm', 'run', 'verify'], out);
