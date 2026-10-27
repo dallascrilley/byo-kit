@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { deployedUrl } from '../tools/release-url.mjs';
 
 const argv = process.argv.slice(2);
 const flags = new Set(argv.filter((item) => item.startsWith('--')));
@@ -45,7 +46,7 @@ if (publish) {
 }
 if (deploy) {
   const output = run('wrangler', ['deploy'], true);
-  const workerUrl = output.match(/https:\/\/[^\s]+/)?.[0] || null;
+  const workerUrl = deployedUrl(output);
   receipt.cloudflare = { status: 'deployed', url: workerUrl, verified_source_sha256: handoff.verification.source_sha256, deployed_at: new Date().toISOString() };
 }
 if (npmPublish) {

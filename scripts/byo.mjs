@@ -83,6 +83,7 @@ function scaffold(raw, outArg) {
   }
   write(out, 'scripts/verify.mjs', readFileSync(join(ROOT, 'templates/project-verify.mjs'), 'utf8'));
   write(out, 'scripts/release.mjs', readFileSync(join(ROOT, 'templates/project-release.mjs'), 'utf8'));
+  write(out, 'tools/release-url.mjs', readFileSync(join(ROOT, 'tools/release-url.mjs'), 'utf8'));
   write(out, 'script/cibuild', '#!/bin/sh\nset -eu\ncd "$(dirname "$0")/.."\nnpm test\n'); chmodSync(join(out, 'script/cibuild'), 0o755);
   write(out, '.github/workflows/ci.yml', readFileSync(join(ROOT, 'templates/github-ci.yml'), 'utf8'));
   write(out, '.depot/workflows/ci.yml', readFileSync(join(ROOT, 'templates/depot-project-ci.yml'), 'utf8'));
