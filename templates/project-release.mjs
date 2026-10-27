@@ -25,7 +25,7 @@ if (!flags.has('--verify')) throw new Error('Release requires --verify; no relea
 const reviewPath = 'docs/DESIGN_REVIEW.md';
 if (!existsSync(reviewPath)) throw new Error('docs/DESIGN_REVIEW.md is missing. Restore it and complete the author review; no release action was taken.');
 const review = readFileSync(reviewPath, 'utf8');
-if (/- \[ \]/.test(review) || /\[(note or n\/a|name|YYYY-MM-DD|list them, or write none)\]/.test(review)) throw new Error('Complete docs/DESIGN_REVIEW.md first: check every box and replace every bracketed placeholder. This confirms the review happened, not that the design is good. No release action was taken.');
+if (/- \[ \]/.test(review) || /\[(note or n\/a|name|YYYY-MM-DD|list them, or write none)\]/.test(review)) throw new Error('Complete docs/DESIGN_REVIEW.md first: check every box and replace every bracketed placeholder. This checks a completion declaration; it cannot establish that the review happened or that the result is good. No release action was taken.');
 run('npm', ['run', 'verify']);
 const concept = JSON.parse(readFileSync('concept.json', 'utf8'));
 const handoff = JSON.parse(readFileSync('portfolio-handoff.json', 'utf8'));

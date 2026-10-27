@@ -5,8 +5,8 @@ Generated defaults: compact `h1` plus one-line description, an input panel besid
 system font, one accent, hairline rules, no card shell, no shadows, no promotional label above the
 title. Visible states: empty, ready, error. Keep these unless the tool needs something else.
 
-- [ ] Applied the `hallmark` skill (`~/.local/share/hub2-runtime/skills/hallmark/SKILL.md`) in `audit` mode to the rendered page, then fixed the ranked findings. If the skill is unavailable, say so here: [note or n/a]
-- [ ] Opened `npm run dev` and looked at the page at 320, 375, 768, and 1280 px. No horizontal scroll, no overlapping text.
+- [ ] Applied the `hallmark` skill (resolve it through Rulebook or your installed skill catalog) in `audit` mode to the rendered page, then fixed the ranked findings. If the skill is unavailable, say so here: [note or n/a]
+- [ ] Opened `npm run dev` and looked at the page at 320, 375, 414, 768, and 1280 px. No horizontal scroll, no overlapping text.
 - [ ] First screen shows the working input and result area without scrolling at 1280 x 800.
 - [ ] Checked the empty, ready, and error states by loading the sample, a valid file, and a malformed file.
 - [ ] Tab order reaches every control and the focus ring is visible.
