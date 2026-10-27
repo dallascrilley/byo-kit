@@ -93,14 +93,18 @@ import { openrouterDecide } from './vendor/byo-kit.js';
 const { answers } = await openrouterDecide({
   key: el.getKey(),
   state: { ticket: 'My invoice is wrong' },
-  questions: [{ id: 'topic', choices: ['billing', 'bug', 'other'] }],
+  questions: {
+    topic: { type: 'choice', instructions: 'Which team handles `ticket`?',
+             criteria: { billing: 'Charges and invoices', bug: 'Something broken', other: null } },
+    urgent: { type: 'noul', instructions: '`ticket` asks for help today' },
+  },
   // model: 'typesafe/jev-1.14',   // the default
-  // fetch: myFetch,               // optional, for tests
 });
-answers.topic; // { type, choice, probabilities, confidence }
+answers.topic;  // { type: 'choice', choice, probabilities, confidence }
+answers.urgent; // { type: 'noul', noul }   probability of yes
 ```
 
-It checks that every question id has an answer with a choice, and that the choice is one of the question's `choices` when you list them. It throws with a plain hint: 401 (key rejected), 402 (out of credit or over the key limit), 404 ("Jev may be blocked by your OpenRouter guardrails"; an account's guardrails can block it).
+Questions use the Decisions API's three types: `choice` (one of the `criteria` keys; include an `other` option), `score` (a position on a list of levels) and `noul` (probability that the statement is true). Each answer is checked against its question before it is returned, and errors carry plain hints: 401 (key rejected), 402 (out of credit or over the key limit), 404 ("Jev may be blocked by your OpenRouter guardrails").
 
 Where the key lives: in memory by default, or in `sessionStorage` if the visitor picks it. Nothing else touches storage, and a test fails the build if the shipped code names `localStorage`, IndexedDB or cookies.
 
@@ -157,7 +161,7 @@ Steps are `goto`, `click`, `hover`, `type`, `fill`, `upload` and `wait` (see `do
 ## Status and honest limits
 
 - Tested: unit tests for the parser, exporter, network counter, providers, key store, relay and templates (`node --test`), and a headless Chrome run of the example with a sample file, pasted CSV and JSON, an uploaded NDJSON file, key storage choices, and stubbed OpenRouter and Anthropic endpoints that check the key, the headers and that no row values leave the page, and the `<byo-data>` attributes.
-- Not tested: a call to a live provider. No test used a real key or reached `openrouter.ai`. The OpenRouter, OpenAI and Anthropic request shapes follow their public docs and the checked CORS behavior, and default model names (`openai/gpt-4o-mini`, `claude-haiku-4-5`, `gpt-4o-mini`) may need editing. `openrouterDecide` was tested with an injected `fetch`; the question format it expects (`id`, optional `choices`) is an assumption, and the live response shape has not been checked against it.
+- Not tested: a call to a live provider. No test used a real key or reached `openrouter.ai`. The OpenRouter, OpenAI and Anthropic request shapes follow their public docs and the checked CORS behavior, and default model names (`openai/gpt-4o-mini`, `claude-haiku-4-5`, `gpt-4o-mini`) may need editing. `openrouterDecide` was tested with an injected `fetch` using the request and response shapes in TypeSafe's published API reference; it has not yet been run against openrouter.ai with a real key.
 - Nothing is published or deployed from this repo yet. The Worker templates have not been run under `wrangler`.
 - The network counter sees `fetch`, XHR and `sendBeacon` only. It does not see image or script loads, WebSockets, or calls made later by code you start.
 - Browsers: checked in Chrome. Web Components and constructed stylesheets are in all current browsers, but others were not tried.

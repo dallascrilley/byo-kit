@@ -1150,14 +1150,21 @@ function toCsv(rows, columns) {
 // OpenRouter Decisions API helper. No DOM, so it runs under node --test.
 //
 //   const { answers } = await openrouterDecide({
-//     key, state: { ... },
-//     questions: [{ id: 'tone', choices: ['formal', 'casual'] }],
+//     key, state: { ticket: '...' },
+//     questions: {
+//       topic:  { type: 'choice', instructions: 'Which team handles `ticket`?',
+//                 criteria: { billing: 'Charges and invoices', bug: 'Something broken', other: null } },
+//       urgent: { type: 'noul',   instructions: '`ticket` asks for help today' },
+//       anger:  { type: 'score',  instructions: 'How upset is the writer?', criteria: ['Calm', 'Annoyed', 'Furious'] },
+//     },
 //   });
-//   answers.tone  // { type, choice, probabilities, confidence }
+//   answers.topic   // { type: 'choice', choice, probabilities, confidence }
+//   answers.urgent  // { type: 'noul', noul }    probability of yes, 0..1
+//   answers.anger   // { type: 'score', score, probabilities, confidence }
 //
-// The default model is TypeSafe's Jev decision model. A question may list
-// `choices` (strings, or objects with id, value or label); when it does, the
-// answer must be one of them. Without `choices`, any non-empty choice is accepted.
+// The default model is TypeSafe's Jev. Every answer is checked against its question:
+// a choice must be one of the criteria keys, a noul a number in [0, 1], a score a
+// number within the levels. Anything else throws.
 
 const DECISIONS_URL = 'https://openrouter.ai/api/alpha/decisions';
 const JEV_MODEL = 'typesafe/jev-1.14';
@@ -1172,8 +1179,32 @@ class OpenRouterError extends Error {
 
 const scrub = (text, key) => (key ? String(text).split(key).join('[key]') : String(text));
 
-function choiceValues(list) {
-  return list.map((c) => (c && typeof c === 'object' ? c.id ?? c.value ?? c.label : c)).map(String);
+const TYPES = new Set(['choice', 'score', 'noul']);
+
+function checkQuestion(id, q) {
+  if (!q || typeof q !== 'object' || !TYPES.has(q.type)) throw new TypeError('Question "' + id + '" needs type choice, score or noul.');
+  if (!q.instructions) throw new TypeError('Question "' + id + '" needs instructions.');
+  if (q.type === 'choice' && (!q.criteria || typeof q.criteria !== 'object' || Array.isArray(q.criteria) || Object.keys(q.criteria).length < 2)) {
+    throw new TypeError('Choice question "' + id + '" needs criteria: an object with at least two options.');
+  }
+  if (q.type === 'score' && (!Array.isArray(q.criteria) || q.criteria.length < 2)) {
+    throw new TypeError('Score question "' + id + '" needs criteria: a list of at least two levels, lowest first.');
+  }
+}
+
+const inRange = (n, lo, hi) => typeof n === 'number' && Number.isFinite(n) && n >= lo && n <= hi;
+
+function checkAnswer(id, q, a, status) {
+  const fail = (why) => { throw new OpenRouterError('Question "' + id + '": ' + why, status); };
+  if (!a || typeof a !== 'object') fail('no answer came back.');
+  if (q.type === 'choice') {
+    const options = Object.keys(q.criteria);
+    if (!options.includes(a.choice)) fail('the model chose "' + a.choice + '", which is not one of: ' + options.join(', ') + '.');
+  } else if (q.type === 'noul') {
+    if (!inRange(a.noul, 0, 1)) fail('expected a probability between 0 and 1.');
+  } else if (!inRange(a.score, 0, q.criteria.length - 1)) {
+    fail('expected a score between 0 and ' + (q.criteria.length - 1) + '.');
+  }
 }
 
 function statusHint(status, model) {
@@ -1193,10 +1224,10 @@ function statusHint(status, model) {
 
 async function openrouterDecide({ key, model = JEV_MODEL, state, questions, fetch: fetchImpl } = {}) {
   if (typeof key !== 'string' || !key.trim()) throw new TypeError('Enter an OpenRouter key.');
-  if (!Array.isArray(questions) || questions.length === 0) throw new TypeError('Give at least one question.');
-  for (const q of questions) {
-    if (!q || typeof q.id !== 'string' || !q.id) throw new TypeError('Every question needs a string id.');
+  if (!questions || typeof questions !== 'object' || Array.isArray(questions) || !Object.keys(questions).length) {
+    throw new TypeError('Give at least one question, as an object of id to question.');
   }
+  for (const [id, q] of Object.entries(questions)) checkQuestion(id, q);
   const doFetch = fetchImpl || globalThis.fetch;
   const apiKey = key.trim();
   let res;
@@ -1222,20 +1253,7 @@ async function openrouterDecide({ key, model = JEV_MODEL, state, questions, fetc
   }
   const answers = json?.answers;
   if (!answers || typeof answers !== 'object') throw new OpenRouterError('OpenRouter returned no answers.', res.status);
-  for (const q of questions) {
-    const a = answers[q.id];
-    const choice = a?.choice;
-    if (choice === undefined || choice === null || choice === '') {
-      throw new OpenRouterError('The model gave no choice for question "' + q.id + '".', res.status);
-    }
-    const allowed = Array.isArray(q.choices) ? choiceValues(q.choices) : null;
-    if (allowed && !allowed.includes(String(choice))) {
-      throw new OpenRouterError(
-        'The model chose "' + choice + '" for question "' + q.id + '", which is not one of: ' + allowed.join(', ') + '.',
-        res.status,
-      );
-    }
-  }
+  for (const [id, q] of Object.entries(questions)) checkAnswer(id, q, answers[id], res.status);
   return { model: json.model || model, answers };
 }
 
