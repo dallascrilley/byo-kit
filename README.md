@@ -1,6 +1,6 @@
 # byo-kit
 
-**Add "bring your own data" and "bring your own key" to a static demo. Data is processed in the browser. Keys are never stored.**
+**Add "bring your own data" and "bring your own key" to a static demo. Data is processed in the browser. API keys stay client-managed.**
 
 ![Loading the sample file shows 8 column profiles and "0 network requests while processing", then a masked API key is entered and accepted](docs/demo.gif)
 
@@ -81,10 +81,34 @@ deploy separately with `node scripts/release.mjs --deploy --verify`; optional
 npm publication uses `--npm`. Each action re-verifies first and writes an
 ignored local receipt with the GitHub repository/commit or Worker URL. A GitHub
 push alone does not prove CI, deployment, or application readiness. Afterward,
-check CI with `gh run list -R OWNER/REPO --limit 5`, watch the selected run with
-`gh run watch RUN_ID -R OWNER/REPO --exit-status`, and open or `curl -f` the
+check the configured CI from the project directory with `gh-axi run list --limit 5`,
+watch a GitHub run with `gh-axi run watch RUN_ID` or inspect its Depot run, and open or `curl -f` the
 Worker URL from the receipt. GitHub self-hosted Linux and Depot workflow
 templates are included.
+
+## Research a useful concept
+
+The stdlib Python helper gathers bounded public GitHub repository/issue evidence
+and reads visible Reddit search results through an existing signed-in Chrome
+session. It records source URLs, observation times and incomplete coverage; it
+never declares an unmet need from an empty search. Python 3 and
+`chrome-devtools-axi` are needed for this optional research command.
+
+```sh
+python3 tools/research-concept.py --technology salesforce --pain permission \
+  --pattern cli --pattern mcp --issue-repo forcedotcom/cli \
+  --subreddit salesforce --reddit-route browser --out concept-research.json
+```
+
+Reddit defaults to the user's browser. The helper opens a task search tab,
+extracts public post links and closes only that new tab, preserving existing
+pages. It does not read cookies or copy a profile. Use `--reddit-route api` only
+when a headless JSON route is desired; an API 403 does not establish that browser
+access is blocked. Open original threads and current competitor docs before
+choosing to extend, contribute, wrap or build. Compare three concepts around a
+concrete user problem, a useful difference and a genuine result visible in a GIF
+shorter than ten seconds. CLIs, MCP servers, Actions, preflight checks, converters,
+explainers and replay tools are patterns to investigate, not novelty claims.
 
 ## Bring your own data
 
@@ -212,7 +236,7 @@ Steps are `goto`, `click`, `hover`, `type`, `fill`, `upload` and `wait` (see `do
 
 - Tested: unit tests for the parser, exporter, network counter, providers, key store, relay and templates (`node --test`), and a headless Chrome run of the example with a sample file, pasted CSV and JSON, an uploaded NDJSON file, key storage choices, and stubbed OpenRouter and Anthropic endpoints that check the key, the headers and that no row values leave the page, and the `<byo-data>` attributes.
 - Not tested: a call to a live provider. No test used a real key or reached `openrouter.ai`. The OpenRouter, OpenAI and Anthropic request shapes follow their public docs and the checked CORS behavior, and default model names (`openai/gpt-4o-mini`, `claude-haiku-4-5`, `gpt-4o-mini`) may need editing. `openrouterDecide` was tested with an injected `fetch` using the request and response shapes in TypeSafe's published API reference; it has not yet been run against openrouter.ai with a real key.
-- Nothing is published or deployed from this repo yet. The Worker templates have not been run under `wrangler`.
+- The kit is published on GitHub. The generated-project proof exercises local browser behavior and GIF capture; the new Worker release path has not been exercised against a live Cloudflare account.
 - The network counter sees `fetch`, XHR and `sendBeacon` only. It does not see image or script loads, WebSockets, or calls made later by code you start.
 - Browsers: checked in Chrome. Web Components and constructed stylesheets are in all current browsers, but others were not tried.
 - The example GIF shows a key being entered, not a model call, because a call would need a real key.

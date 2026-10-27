@@ -10,5 +10,6 @@ cd "$ROOT"
 node --version
 node scripts/bundle.mjs --check
 node --test
+python3 -m unittest discover -s test -p test_research.py
 node script/smoke.mjs
 echo "cibuild: ok"
