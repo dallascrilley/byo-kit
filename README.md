@@ -117,7 +117,7 @@ extracts public post links and closes only that new tab, preserving existing
 pages. It does not read cookies or copy a profile. Use `--reddit-route api` only
 when a headless JSON route is desired; an API 403 does not establish that browser
 access is blocked. Open original threads and current competitor docs before
-choosing to extend, contribute, wrap or build. Compare three concepts around a
+choosing to extend, contribute, wrap or build. Compare distinct approaches to a
 concrete user problem, a useful difference and a genuine result visible in a GIF
 shorter than ten seconds. CLIs, MCP servers, Actions, preflight checks, converters,
 explainers and replay tools are patterns to investigate, not novelty claims.
