@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, mkdtempSync, mkdirSync, copyFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, mkdirSync, copyFileSync, existsSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
@@ -33,28 +33,57 @@ test('wrangler.jsonc parses and wires assets to the worker', () => {
   assert.match(cfg.compatibility_date, /^\d{4}-\d{2}-\d{2}$/);
 });
 
-test('worker.js serves assets and mounts the relay', async () => {
+async function loadWorker(source, { withRelay }) {
   const dir = mkdtempSync(join(tmpdir(), 'byo-worker-'));
-  mkdirSync(join(dir, 'relay'));
-  copyFileSync(join(ROOT, 'templates/worker.js'), join(dir, 'worker.js'));
-  copyFileSync(join(ROOT, 'relay/index.js'), join(dir, 'relay/index.js'));
-  const worker = (await import(pathToFileURL(join(dir, 'worker.js')).href)).default;
+  writeFileSync(join(dir, 'worker.js'), source);
+  if (withRelay) {
+    mkdirSync(join(dir, 'relay'));
+    copyFileSync(join(ROOT, 'relay/index.js'), join(dir, 'relay/index.js'));
+  }
+  return (await import(pathToFileURL(join(dir, 'worker.js')).href)).default;
+}
+
+// Removes "// " from the lines between each pair of "relay on" markers.
+function enableRelay(source) {
+  let on = false;
+  return source
+    .split('\n')
+    .map((line) => {
+      if (/\/\/ relay on: begin/.test(line)) { on = true; return line; }
+      if (/\/\/ relay on: end/.test(line)) { on = false; return line; }
+      return on ? line.replace(/^(\s*)\/\/ ?/, '$1') : line;
+    })
+    .join('\n');
+}
+
+test('worker.js mounts no relay route by default and serves assets', async () => {
+  const source = read('templates/worker.js');
+  assert.ok(!/^\s*import\s/m.test(source), 'the default worker imports nothing');
+  assert.ok(!/typesafe/i.test(source));
+  const worker = await loadWorker(source, { withRelay: false });
+  const env = { ASSETS: { fetch: async (r) => new Response('asset:' + new URL(r.url).pathname) }, ALLOWED_ORIGINS: '' };
+  assert.equal(await (await worker.fetch(new Request('https://demo.test/index.html'), env)).text(), 'asset:/index.html');
+  assert.equal(await (await worker.fetch(new Request('https://demo.test/api/acme/v1/models'), env)).text(), 'asset:/api/acme/v1/models');
+});
+
+test('worker.js: removing the comments from the example turns the relay on', async () => {
+  const worker = await loadWorker(enableRelay(read('templates/worker.js')), { withRelay: true });
   const env = { ASSETS: { fetch: async () => new Response('asset') }, ALLOWED_ORIGINS: 'https://friend.test' };
 
   const page = await worker.fetch(new Request('https://demo.test/index.html'), env);
   assert.equal(await page.text(), 'asset');
 
-  const blocked = await worker.fetch(new Request('https://demo.test/api/typesafe/v1/models', { headers: { origin: 'https://evil.test' } }), env);
+  const blocked = await worker.fetch(new Request('https://demo.test/api/acme/v1/models', { headers: { origin: 'https://evil.test' } }), env);
   assert.equal(blocked.status, 403);
 
-  const preflight = await worker.fetch(new Request('https://demo.test/api/typesafe/v1/systemone', { method: 'OPTIONS', headers: { origin: 'https://friend.test' } }), env);
+  const preflight = await worker.fetch(new Request('https://demo.test/api/acme/v1/chat', { method: 'OPTIONS', headers: { origin: 'https://friend.test' } }), env);
   assert.equal(preflight.status, 204);
   assert.equal(preflight.headers.get('access-control-allow-origin'), 'https://friend.test');
 });
 
-test('the shipped provider descriptor and the worker template agree on the relay path', () => {
-  assert.match(read('templates/worker.js'), /'\/api\/typesafe'/);
-  assert.match(read('src/core/providers.js'), /relayPath: '\/api\/typesafe'/);
+test('every shipped provider is direct, so the template needs no relay route', async () => {
+  const { PROVIDERS } = await import('../src/core/providers.js');
+  for (const p of Object.values(PROVIDERS)) assert.equal(p.mode, 'direct', p.id);
 });
 
 test('CI files follow the Depot pattern', () => {

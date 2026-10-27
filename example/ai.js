@@ -1,7 +1,7 @@
 // Provider calls for the optional "describe this dataset" button. No DOM.
 import { requestFor, getProvider, normalizeProvider } from '../dist/byo-kit.js';
 
-export const DEFAULT_MODELS = { anthropic: 'claude-haiku-4-5', openai: 'gpt-4o-mini' };
+export const DEFAULT_MODELS = { openrouter: 'openai/gpt-4o-mini', anthropic: 'claude-haiku-4-5', openai: 'gpt-4o-mini' };
 
 export function buildPrompt(summary) {
   return (
@@ -16,6 +16,12 @@ export function buildDescribeRequest(providerId, model, summary) {
   const prompt = buildPrompt(summary);
   if (providerId === 'anthropic') {
     return { path: '/v1/messages', body: { model, max_tokens: 400, messages: [{ role: 'user', content: prompt }] } };
+  }
+  if (providerId === 'openrouter') {
+    return {
+      path: '/api/v1/chat/completions',
+      body: { model, max_tokens: 400, messages: [{ role: 'user', content: prompt }] },
+    };
   }
   if (providerId === 'openai') {
     return {

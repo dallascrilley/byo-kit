@@ -1,16 +1,43 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PROVIDERS, openai, anthropic, typesafe, normalizeProvider, checkKeyFormat, describeRoute, requestFor, createKeyTest,
+  PROVIDERS, openrouter, openai, anthropic, normalizeProvider, checkKeyFormat, describeRoute, requestFor, createKeyTest,
 } from '../src/core/providers.js';
 import { createKeyStore, maskKey } from '../src/core/key-store.js';
 
-test('built-in descriptors have the documented modes', () => {
-  assert.equal(openai.mode, 'direct');
-  assert.equal(anthropic.mode, 'direct');
-  assert.equal(typesafe.mode, 'relay');
-  assert.equal(typesafe.relayPath, '/api/typesafe');
-  assert.deepEqual(Object.keys(PROVIDERS), ['openai', 'anthropic', 'typesafe']);
+// A made-up provider that sends no CORS headers, for the relay-mode tests.
+const acme = {
+  id: 'acme', label: 'Acme', mode: 'relay', endpoint: 'https://api.acme.example', relayPath: '/api/acme',
+  auth: { header: 'authorization', prefix: 'Bearer ' },
+};
+
+test('built-in descriptors are direct, with OpenRouter first', () => {
+  for (const p of Object.values(PROVIDERS)) assert.equal(p.mode, 'direct', p.id);
+  assert.deepEqual(Object.keys(PROVIDERS), ['openrouter', 'openai', 'anthropic']);
+});
+
+test('openrouter descriptor: endpoint, key test path, key shape and note', () => {
+  const p = normalizeProvider(openrouter);
+  assert.equal(p.endpoint, 'https://openrouter.ai');
+  assert.equal(p.testPath, '/api/v1/key');
+  assert.equal(p.docsUrl, 'https://openrouter.ai/settings/keys');
+  assert.deepEqual(p.auth, { header: 'authorization', prefix: 'Bearer ' });
+  assert.match(p.note, /small credit limit/);
+  assert.equal(checkKeyFormat(p, 'sk-or-v1-' + 'a1b2c3d4'.repeat(8)), null);
+  assert.match(checkKeyFormat(p, 'sk-or-v1-' + 'a'.repeat(63)), /does not match the OpenRouter key format/);
+  assert.match(checkKeyFormat(p, 'sk-or-v1-' + 'g'.repeat(64)), /does not match/);
+  assert.match(checkKeyFormat(p, 'sk-' + 'a'.repeat(64)), /does not match/);
+  assert.match(describeRoute(p).text, /straight from your browser to openrouter\.ai/);
+});
+
+test('openrouter key test calls GET /api/v1/key with the bearer key', async () => {
+  const seen = [];
+  const key = 'sk-or-v1-' + 'ab12'.repeat(16);
+  const test = createKeyTest(openrouter, { fetchImpl: async (url, init) => { seen.push({ url, init }); return { ok: true, status: 200 }; } });
+  assert.equal((await test(key)).ok, true);
+  assert.equal(seen[0].url, 'https://openrouter.ai/api/v1/key');
+  assert.equal(seen[0].init.method, 'GET');
+  assert.equal(seen[0].init.headers.authorization, 'Bearer ' + key);
 });
 
 test('anthropic sends the browser access header and documents it', () => {
@@ -37,18 +64,18 @@ test('route text: direct says straight to the provider', () => {
 });
 
 test('route text: relay names the origin and path and says it stores nothing', () => {
-  const r = describeRoute(typesafe, 'https://demo.test');
+  const r = describeRoute(acme, 'https://demo.test');
   assert.equal(r.kind, 'relay');
-  assert.equal(r.url, 'https://demo.test/api/typesafe');
-  assert.match(r.text, /https:\/\/demo\.test\/api\/typesafe/);
+  assert.equal(r.url, 'https://demo.test/api/acme');
+  assert.match(r.text, /https:\/\/demo\.test\/api\/acme/);
   assert.match(r.text, /stores nothing/);
-  assert.match(r.text, /api\.typesafe\.ai/);
+  assert.match(r.text, /api\.acme\.example/);
 });
 
 test('relay requests go to the relay origin, direct requests to the provider', () => {
-  assert.equal(requestFor(typesafe, 'k'.repeat(20), '/v1/systemone', 'https://demo.test').url, 'https://demo.test/api/typesafe/v1/systemone');
+  assert.equal(requestFor(acme, 'k'.repeat(20), '/v1/chat', 'https://demo.test').url, 'https://demo.test/api/acme/v1/chat');
   assert.equal(requestFor(openai, 'sk-' + 'a'.repeat(20), '/v1/models').url, 'https://api.openai.com/v1/models');
-  assert.equal(requestFor(typesafe, 'k'.repeat(20), '/x', '').headers.authorization, 'Bearer ' + 'k'.repeat(20));
+  assert.equal(requestFor(acme, 'k'.repeat(20), '/x', '').headers.authorization, 'Bearer ' + 'k'.repeat(20));
 });
 
 test('normalizeProvider validates the descriptor', () => {

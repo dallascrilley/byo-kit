@@ -28,13 +28,14 @@
         <div class="pick">
           <label for="provider">Provider</label>
           <select id="provider">
+            <option value="openrouter">OpenRouter (many models)</option>
             <option value="anthropic">Anthropic</option>
             <option value="openai">OpenAI</option>
           </select>
           <label for="model">Model</label>
           <input id="model" type="text" spellcheck="false" autocomplete="off">
         </div>
-        <byo-key id="key" provider="anthropic"></byo-key>
+        <byo-key id="key" provider="openrouter"></byo-key>
       </section>
     </div>
 

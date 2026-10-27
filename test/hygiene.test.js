@@ -55,5 +55,5 @@ test('dist/byo-kit.js is current and self-contained', () => {
 test('dist exports the same names as src', async () => {
   const [a, b] = await Promise.all([import('../src/index.js'), import('../dist/byo-kit.js')]);
   assert.deepEqual(Object.keys(b).sort(), Object.keys(a).sort());
-  for (const k of ['ByoData', 'ByoKey', 'parseCsv', 'countNetworkCalls', 'typesafe']) assert.ok(k in b, k);
+  for (const k of ['ByoData', 'ByoKey', 'parseCsv', 'countNetworkCalls', 'openrouter', 'openrouterDecide']) assert.ok(k in b, k);
 });

@@ -4,13 +4,13 @@
 
 ![Loading the sample file shows 8 column profiles and "0 network requests while processing", then a masked API key is entered and accepted](docs/demo.gif)
 
-Most demos either ship canned data or ask visitors to trust a server with their files and their API keys. byo-kit gives you two Web Components that do the honest version, plus a tiny relay for providers that browsers cannot call directly. No dependencies, no build step.
+Most demos either ship canned data or ask visitors to trust a server with their files and their API keys. byo-kit gives you two Web Components that do the honest version, plus a tiny optional relay for providers that browsers cannot call directly. No dependencies, no build step.
 
 ```html
 <script type="module" src="/vendor/byo-kit.js"></script>
 
 <byo-data sample-url="sample.csv"></byo-data>
-<byo-key provider="anthropic"></byo-key>
+<byo-key provider="openrouter"></byo-key>
 
 <script type="module">
   const data = document.querySelector('byo-data');
@@ -27,25 +27,37 @@ Most demos either ship canned data or ask visitors to trust a server with their 
 
 | Piece | What it does |
 | --- | --- |
-| `<byo-data>` | Drop zone, file picker, paste box and a "Use sample data" button. Reads JSON, NDJSON and CSV (RFC 4180: quotes, escaped quotes, CRLF, byte order mark). Size limit, your `validate()` errors shown inline, one `byo-data` event. |
+| `<byo-data>` | Drop zone, file picker, paste box and a "Use sample data" button. Reads JSON, NDJSON and CSV (RFC 4180: quotes, escaped quotes, CRLF, byte order mark). Size limit, your `validate()` errors shown inline, one `byo-data` event. Heading, placeholder and file types can be changed. |
 | `<byo-key>` | Masked key field with show and hide, memory or sessionStorage, "Forget key", an optional `test()` hook, and a plain statement of where the key goes. |
 | `countNetworkCalls(fn)` | Counts `fetch`, XHR and beacon calls made while `fn` runs, so the page can say "0 network requests while processing" and mean it. |
-| `createRelay({routes, allowedOrigins})` | A stateless pass through for Cloudflare Workers, for providers that send no CORS headers. |
+| `openrouterDecide({key, state, questions})` | One call to OpenRouter's Decisions API (default model `typesafe/jev-1.14`), with answer checks and plain error hints. |
+| `createRelay({routes, allowedOrigins})` | Optional. A stateless pass through for Cloudflare Workers, for providers that send no CORS headers. OpenRouter, OpenAI and Anthropic do not need it. |
 | `toCsv()` | CSV export that neutralizes spreadsheet formula injection. |
 | `tools/record-demo.mjs` | Records a README GIF of at most 10 seconds from a JSON step script. |
 | `templates/` | README, `wrangler.jsonc`, `worker.js`, and Depot CI files for the next project. |
 
 ## Bring your own data
 
-`<byo-data>` attributes: `sample-url`, `max-bytes` (default 5 MiB). Properties: `validate(data) -> string[]`, `value`, `load(text, {name, source})`, `clear()`.
+`<byo-data>` attributes, all optional:
+
+| Attribute | Effect |
+| --- | --- |
+| `sample-url` | Shows a "Use sample data" button that loads this URL. |
+| `max-bytes` | Size limit. Default 5 MiB. |
+| `label` | Heading of the drop zone. Default "Drop a CSV, JSON or NDJSON file here". |
+| `paste-placeholder` | Placeholder text of the paste box. |
+| `accept` | The file picker's `accept` value, for example `.csv,.json`. It is also shown under the heading as "Accepted: .csv, .json". It filters the picker only; a dropped file is still checked by its content. |
+| `hide-paste` | Boolean. Hides the paste box. |
+
+Properties: `validate(data) -> string[]`, `value`, `load(text, {name, source})`, `clear()`.
 
 The event detail is `{ data, name, source, bytes }`. CSV arrives as an array of objects keyed by the header row. The element dispatches the event inside the network counter, so the line under the box ("Loaded sample.csv: 120 records, 7.1 KB. 0 network requests while processing.") covers reading, your `validate()` and the synchronous part of your listeners. Work you start later, such as an awaited fetch, is outside the window.
 
-The element also fires `byo-data-error` with `{ errors }`.
+The element also fires `byo-data-error` with `{ errors }`. A later successful load clears the earlier error list.
 
 ## Bring your own key
 
-`<byo-key provider="openai | anthropic | typesafe">` or set `el.provider` to your own descriptor:
+`<byo-key provider="openrouter | openai | anthropic">` or set `el.provider` to your own descriptor:
 
 ```js
 el.provider = {
@@ -65,13 +77,36 @@ The event never carries the key. Call `getKey()` when you need it. `requestFor(p
 
 | Provider | Mode | Notes |
 | --- | --- | --- |
+| `openrouter` | direct | The default. One key reaches many models. Bearer key straight to `openrouter.ai`, which answers browser preflights with `access-control-allow-origin: *`. Keys look like `sk-or-v1-` plus 64 hex characters. The key test is `GET /api/v1/key`. Make the key with a small credit limit. |
 | `openai` | direct | Bearer key straight to `api.openai.com`. |
 | `anthropic` | direct | Sends `anthropic-dangerous-direct-browser-access: true`. Anthropic requires it for browser calls. The name is a warning: the page can see the key, so use one you can revoke. |
-| `typesafe` | relay | `api.typesafe.ai` sends no `Access-Control-Allow-Origin` header (checked), so a browser cannot call it. Calls go through your relay at `/api/typesafe`. |
+
+The example calls `https://openrouter.ai/api/v1/chat/completions` with the model `openai/gpt-4o-mini`. The model box is editable.
+
+### The Decisions API
+
+OpenRouter serves TypeSafe's Jev decision model as `typesafe/jev-1.14`.
+
+```js
+import { openrouterDecide } from './vendor/byo-kit.js';
+
+const { answers } = await openrouterDecide({
+  key: el.getKey(),
+  state: { ticket: 'My invoice is wrong' },
+  questions: [{ id: 'topic', choices: ['billing', 'bug', 'other'] }],
+  // model: 'typesafe/jev-1.14',   // the default
+  // fetch: myFetch,               // optional, for tests
+});
+answers.topic; // { type, choice, probabilities, confidence }
+```
+
+It checks that every question id has an answer with a choice, and that the choice is one of the question's `choices` when you list them. It throws with a plain hint: 401 (key rejected), 402 (out of credit or over the key limit), 404 ("Jev may be blocked by your OpenRouter guardrails"; an account's guardrails can block it).
 
 Where the key lives: in memory by default, or in `sessionStorage` if the visitor picks it. Nothing else touches storage, and a test fails the build if the shipped code names `localStorage`, IndexedDB or cookies.
 
-### The relay
+### The relay (optional)
+
+Use it only for a provider whose API sends no CORS headers. The built-in providers do not need it, and `templates/worker.js` mounts no relay route by default.
 
 ```js
 import { createRelay } from './relay/index.js';
@@ -79,8 +114,8 @@ import { createRelay } from './relay/index.js';
 const relay = createRelay({
   allowedOrigins: [],                    // empty means same origin only
   routes: {
-    '/api/typesafe': {
-      upstream: 'https://api.typesafe.ai',
+    '/api/acme': {
+      upstream: 'https://api.acme.example',
       methods: ['GET', 'POST'],
       allowPaths: ['/v1/'],
       headers: [],                       // extras beyond authorization and content-type
@@ -103,7 +138,7 @@ byo-data, byo-key { --byo-accent: #0a7d5a; --byo-radius: 8px; }
 byo-data::part(dropzone) { border-style: solid; }
 ```
 
-Variables: `--byo-bg --byo-soft --byo-ink --byo-muted --byo-line --byo-accent --byo-accent-soft --byo-on-accent --byo-good --byo-warn --byo-danger --byo-radius --byo-font --byo-mono`. Parts: `box dropzone button primary input textarea label link privacy status errors route choice`. Light and dark follow `prefers-color-scheme`. Controls are real buttons and inputs with labels and visible focus, and motion stops under `prefers-reduced-motion`.
+Variables: `--byo-bg --byo-soft --byo-ink --byo-muted --byo-line --byo-accent --byo-accent-soft --byo-on-accent --byo-good --byo-warn --byo-danger --byo-radius --byo-font --byo-mono`. Parts: `box dropzone hint button primary input textarea label link privacy status errors route choice`. Light and dark follow `prefers-color-scheme`. Controls are real buttons and inputs with labels and visible focus, and motion stops under `prefers-reduced-motion`.
 
 ## Make the README GIF
 
@@ -121,8 +156,8 @@ Steps are `goto`, `click`, `hover`, `type`, `fill`, `upload` and `wait` (see `do
 
 ## Status and honest limits
 
-- Tested: unit tests for the parser, exporter, network counter, providers, key store, relay and templates (`node --test`), and a headless Chrome run of the example with a sample file, pasted CSV and JSON, an uploaded NDJSON file, key storage choices, and a stubbed Anthropic endpoint that checks the key, the browser header and that no row values leave the page.
-- Not tested: a call to a live provider. The OpenAI and Anthropic request shapes follow their public docs, and default model names (`claude-haiku-4-5`, `gpt-4o-mini`) may need editing. The `typesafe` relay path has not run against the live API with a real key.
+- Tested: unit tests for the parser, exporter, network counter, providers, key store, relay and templates (`node --test`), and a headless Chrome run of the example with a sample file, pasted CSV and JSON, an uploaded NDJSON file, key storage choices, and stubbed OpenRouter and Anthropic endpoints that check the key, the headers and that no row values leave the page, and the `<byo-data>` attributes.
+- Not tested: a call to a live provider. No test used a real key or reached `openrouter.ai`. The OpenRouter, OpenAI and Anthropic request shapes follow their public docs and the checked CORS behavior, and default model names (`openai/gpt-4o-mini`, `claude-haiku-4-5`, `gpt-4o-mini`) may need editing. `openrouterDecide` was tested with an injected `fetch`; the question format it expects (`id`, optional `choices`) is an assumption, and the live response shape has not been checked against it.
 - Nothing is published or deployed from this repo yet. The Worker templates have not been run under `wrangler`.
 - The network counter sees `fetch`, XHR and `sendBeacon` only. It does not see image or script loads, WebSockets, or calls made later by code you start.
 - Browsers: checked in Chrome. Web Components and constructed stylesheets are in all current browsers, but others were not tried.

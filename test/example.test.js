@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseText, toCsv } from '../dist/byo-kit.js';
 import { validateRows, profileColumns, profileToCsv, summarizeForModel } from '../example/profile.js';
-import { buildDescribeRequest, extractText, describeDataset, buildPrompt } from '../example/ai.js';
+import { buildDescribeRequest, extractText, describeDataset, buildPrompt, DEFAULT_MODELS } from '../example/ai.js';
 
 const sample = readFileSync(new URL('../example/sample.csv', import.meta.url), 'utf8');
 
@@ -61,9 +61,15 @@ test('request shapes per provider', () => {
   assert.equal(a.body.model, 'm');
   const o = buildDescribeRequest('openai', 'm', s);
   assert.equal(o.path, '/v1/chat/completions');
+  const r = buildDescribeRequest('openrouter', 'openai/gpt-4o-mini', s);
+  assert.equal(r.path, '/api/v1/chat/completions');
+  assert.equal(r.body.model, 'openai/gpt-4o-mini');
+  assert.equal(r.body.messages[0].role, 'user');
+  assert.equal(DEFAULT_MODELS.openrouter, 'openai/gpt-4o-mini');
   assert.throws(() => buildDescribeRequest('nope', 'm', s), /does not know/);
   assert.equal(extractText('anthropic', { content: [{ type: 'text', text: 'hi ' }, { type: 'tool_use' }] }), 'hi');
   assert.equal(extractText('openai', { choices: [{ message: { content: ' yo ' } }] }), 'yo');
+  assert.equal(extractText('openrouter', { choices: [{ message: { content: ' hey ' } }] }), 'hey');
 });
 
 test('describeDataset sends the key to the provider only, and scrubs it from errors', async () => {

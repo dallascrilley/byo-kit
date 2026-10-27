@@ -8,8 +8,11 @@ export {
 export { toCsv, csvCell, neutralizeFormula } from './core/csv-export.js';
 export { countNetworkCalls } from './core/network-guard.js';
 export {
-  PROVIDERS, openai, anthropic, typesafe, getProvider, normalizeProvider, checkKeyFormat, describeRoute,
+  PROVIDERS, openrouter, openai, anthropic, getProvider, normalizeProvider, checkKeyFormat, describeRoute,
   requestFor, createKeyTest, hostOf,
 } from './core/providers.js';
+export {
+  openrouterDecide, OpenRouterError, DECISIONS_URL, JEV_MODEL,
+} from './core/openrouter.js';
 export { createKeyStore, maskKey } from './core/key-store.js';
 export { downloadText } from './dom/h.js';

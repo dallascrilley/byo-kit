@@ -44,22 +44,25 @@ export const anthropic = Object.freeze({
   testPath: '/v1/models',
 });
 
-// api.typesafe.ai sends no Access-Control-Allow-Origin header, so a browser
-// cannot call it directly. Calls go through the relay in relay/index.js.
-export const typesafe = Object.freeze({
-  id: 'typesafe',
-  label: 'TypeSafe (Jev)',
-  keyPattern: '^[A-Za-z0-9._-]{16,}$',
-  docsUrl: 'https://docs.typesafe.ai',
-  mode: 'relay',
-  endpoint: 'https://api.typesafe.ai',
-  relayPath: '/api/typesafe',
+// OpenRouter answers browser preflights for /api/v1/chat/completions and
+// /api/alpha/decisions with access-control-allow-origin: * and allows the
+// Authorization, Content-Type, HTTP-Referer and X-Title headers, so the browser
+// calls it directly. One key reaches many models. GET /api/v1/key is a cheap
+// key test: it returns the key's label and limit.
+export const openrouter = Object.freeze({
+  id: 'openrouter',
+  label: 'OpenRouter',
+  keyPattern: '^sk-or-v1-[A-Fa-f0-9]{64}$',
+  docsUrl: 'https://openrouter.ai/settings/keys',
+  mode: 'direct',
+  endpoint: 'https://openrouter.ai',
+  note: 'Make a key with a small credit limit for this demo, so a leaked key can only spend a little.',
   auth: Object.freeze({ header: 'authorization', prefix: 'Bearer ' }),
   headers: Object.freeze({}),
-  testPath: '/v1/models',
+  testPath: '/api/v1/key',
 });
 
-export const PROVIDERS = Object.freeze({ openai, anthropic, typesafe });
+export const PROVIDERS = Object.freeze({ openrouter, openai, anthropic });
 
 export function getProvider(id) {
   return PROVIDERS[id] || null;

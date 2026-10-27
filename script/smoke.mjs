@@ -24,6 +24,7 @@ try {
 
 const { url, close } = await startServer(ROOT, 0);
 const FAKE_KEY = 'sk-ant-' + 'k'.repeat(10) + 'SMOKE' + 'q'.repeat(15);
+const OR_KEY = 'sk-or-v1-' + 'a1b2c3d4'.repeat(8);
 const steps = [];
 const ok = (name) => steps.push(name);
 
@@ -56,6 +57,23 @@ try {
       headers: { ...cors, 'content-type': 'application/json' },
       body: JSON.stringify({ content: [{ type: 'text', text: 'Support tickets with a channel and a rating.' }] }),
     });
+  });
+
+  // Pretend to be OpenRouter: key test (GET /api/v1/key) and chat completions.
+  let orSeen = [];
+  await page.route('https://openrouter.ai/**', async (route) => {
+    const req = route.request();
+    const cors = {
+      'access-control-allow-origin': url,
+      'access-control-allow-headers': '*',
+      'access-control-allow-methods': 'GET, POST, OPTIONS',
+    };
+    if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, headers: cors });
+    orSeen.push({ method: req.method(), url: req.url(), headers: req.headers(), body: req.postData() });
+    const body = req.url().endsWith('/api/v1/key')
+      ? { data: { label: 'smoke', limit: 1 } }
+      : { choices: [{ message: { content: 'OpenRouter says: support tickets.' } }] };
+    await route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(body) });
   });
 
   await page.goto(url + '/example/');
@@ -111,9 +129,73 @@ try {
   await page.evaluate(() => document.querySelector('byo-data').removeAttribute('max-bytes'));
   ok('size limit message');
 
-  // 6. Key: format check, masking, storage choices, forget
+  // 5b. byo-data customization attributes, and a success clears an earlier error
+  const dz = data.locator('[part~=dropzone]');
+  const fileInput = data.locator('input[type=file]');
+  assert.equal(await dz.locator('strong').innerText(), 'Drop a CSV, JSON or NDJSON file here');
+  assert.equal(await data.getByLabel('Or paste data').getAttribute('placeholder'), 'name,score\nAda,12');
+  assert.equal(await data.locator('[part~=hint]').isVisible(), false);
+  await page.evaluate(() => {
+    const d = document.querySelector('byo-data');
+    d.setAttribute('label', 'Drop your tickets here');
+    d.setAttribute('paste-placeholder', 'id,subject');
+    d.setAttribute('accept', '.csv,.json');
+    d.setAttribute('hide-paste', '');
+  });
+  assert.equal(await dz.locator('strong').innerText(), 'Drop your tickets here');
+  assert.equal(await fileInput.getAttribute('accept'), '.csv,.json');
+  assert.match(await data.locator('[part~=hint]').innerText(), /Accepted: \.csv, \.json/);
+  assert.equal(await data.getByLabel('Or paste data').isVisible(), false);
+  assert.equal(await data.getByRole('button', { name: 'Use pasted data' }).isVisible(), false);
+  await page.evaluate(() => document.querySelector('byo-data').removeAttribute('hide-paste'));
+  assert.equal(await data.getByLabel('Or paste data').getAttribute('placeholder'), 'id,subject');
+  assert.equal(await data.getByLabel('Or paste data').isVisible(), true);
+  // error first, then a good load clears the error list
+  await data.getByLabel('Or paste data').fill('[1,2,3]');
+  await data.getByRole('button', { name: 'Use pasted data' }).click();
+  await data.locator('[part~=errors]').waitFor({ state: 'visible' });
+  await data.getByLabel('Or paste data').fill('a,b\n1,2\n');
+  await data.getByRole('button', { name: 'Use pasted data' }).click();
+  await data.locator('[part~=errors]').waitFor({ state: 'hidden' });
+  assert.match(await status.innerText(), /Loaded pasted data: 1 record/);
+  await page.evaluate(() => {
+    const d = document.querySelector('byo-data');
+    for (const a of ['label', 'paste-placeholder', 'accept']) d.removeAttribute(a);
+  });
+  assert.equal(await dz.locator('strong').innerText(), 'Drop a CSV, JSON or NDJSON file here');
+  assert.match(await fileInput.getAttribute('accept'), /^\.csv,\.json,\.ndjson/);
+  assert.equal(await data.locator('[part~=hint]').isVisible(), false);
+  ok('byo-data: label, paste-placeholder, accept (with hint), hide-paste, errors cleared on success');
+
+  // 5c. OpenRouter is the default provider: key test and a call go straight to openrouter.ai
   await data.getByRole('button', { name: 'Use sample data' }).click();
   await page.waitForFunction(() => document.querySelector('#summary').textContent.startsWith('sample.csv'));
+  assert.equal(await page.locator('#provider').inputValue(), 'openrouter');
+  assert.equal(await page.locator('#model').inputValue(), 'openai/gpt-4o-mini');
+  const orKey = page.locator('byo-key');
+  assert.match(await orKey.locator('[part~=route]').innerText(), /straight from your browser to openrouter\.ai/);
+  const orInput = orKey.getByLabel('OpenRouter API key');
+  await orInput.fill(OR_KEY);
+  await orKey.getByRole('button', { name: 'Use key' }).click();
+  await orKey.getByRole('button', { name: 'Test key' }).click();
+  await orKey.locator('[part~=status]').filter({ hasText: 'OpenRouter accepted the key' }).waitFor();
+  assert.equal(orSeen[0].method, 'GET');
+  assert.equal(orSeen[0].url, 'https://openrouter.ai/api/v1/key');
+  assert.equal(orSeen[0].headers.authorization, 'Bearer ' + OR_KEY);
+  await page.locator('#describe').click();
+  await page.waitForFunction(() => document.querySelector('#answer').textContent.startsWith('OpenRouter says'));
+  const chat = orSeen.at(-1);
+  assert.equal(chat.url, 'https://openrouter.ai/api/v1/chat/completions');
+  assert.equal(chat.headers.authorization, 'Bearer ' + OR_KEY);
+  assert.equal(JSON.parse(chat.body).model, 'openai/gpt-4o-mini');
+  assert.ok(!chat.body.includes('Litware') && !chat.body.includes('Billing question'), 'request body contains row values');
+  assert.match(await page.locator('#net').innerText(), /1 network request to openrouter\.ai/);
+  await orKey.getByRole('button', { name: 'Forget key' }).click();
+  ok('openrouter (default): key test, bearer key, model and body checked against a stubbed provider');
+
+  // 6. Key (Anthropic): format check, masking, storage choices, forget
+  await page.locator('#provider').selectOption('anthropic');
+  assert.equal(await page.locator('#model').inputValue(), 'claude-haiku-4-5');
   const key = page.locator('byo-key');
   const input = key.getByLabel('Anthropic API key');
   assert.equal(await input.getAttribute('type'), 'password');
@@ -165,7 +247,8 @@ try {
 
   // 9. Nothing leaked to the console, and only this server (plus the stub) was contacted
   assert.ok(!consoleText.join('\n').includes(FAKE_KEY), 'key appeared in console output');
-  const foreign = requests.filter((u) => !u.startsWith(url) && !u.startsWith('https://api.anthropic.com/') && !u.startsWith('data:') && !u.startsWith('blob:'));
+  assert.ok(!consoleText.join('\n').includes(OR_KEY), 'OpenRouter key appeared in console output');
+  const foreign = requests.filter((u) => !u.startsWith(url) && !u.startsWith('https://api.anthropic.com/') && !u.startsWith('https://openrouter.ai/') && !u.startsWith('data:') && !u.startsWith('blob:'));
   assert.deepEqual(foreign, []);
   assert.deepEqual(problems, []);
   ok('no console output with the key, no unexpected requests, no page errors');

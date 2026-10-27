@@ -1,6 +1,6 @@
 // Theme with CSS custom properties (--byo-*) or with ::part().
 // Parts: box, dropzone, button, primary, input, textarea, label, link,
-//        privacy, status, errors, route, choice
+//        hint, privacy, status, errors, route, choice
 
 export const BASE_CSS = `
 :host{
@@ -51,7 +51,10 @@ export const DATA_CSS = `
 .dz{border:1.5px dashed var(--byo-line);border-radius:12px;padding:14px;text-align:center;background:var(--byo-soft);transition:border-color .2s,background .2s}
 :host([dragging]) .dz{border-color:var(--byo-accent);background:var(--byo-accent-soft)}
 .dz strong{display:block;font-size:15px;letter-spacing:-.2px}
+.dz .hint{display:block;margin-top:2px;color:var(--byo-muted);font-size:12px}
+.dz .hint[hidden]{display:none}
 .dz .row{justify-content:center;margin-top:10px}
+.paste[hidden]{display:none}
 .paste{margin-top:10px}
 .paste label{display:block;margin-bottom:4px}
 .pr{display:flex;gap:8px;align-items:flex-end}

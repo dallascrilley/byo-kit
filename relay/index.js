@@ -4,8 +4,8 @@
 //   const relay = createRelay({
 //     allowedOrigins: [],                       // empty = same origin only
 //     routes: {
-//       '/api/typesafe': {
-//         upstream: 'https://api.typesafe.ai',
+//       '/api/acme': {
+//         upstream: 'https://api.acme.example',
 //         methods: ['GET', 'POST'],
 //         allowPaths: ['/v1/'],                 // optional path prefixes
 //         headers: [],                          // extra request headers to forward

@@ -80,7 +80,7 @@ function setProvider(id) {
   syncDescribe();
 }
 $('provider').addEventListener('change', (e) => setProvider(e.target.value));
-$('model').value = DEFAULT_MODELS.anthropic;
+$('model').value = DEFAULT_MODELS.openrouter;
 
 $('describe').addEventListener('click', async () => {
   const key = keyEl.getKey();

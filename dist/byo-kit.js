@@ -54,7 +54,7 @@ function downloadText(filename, text, type = 'text/csv;charset=utf-8') {
 // ---- src/dom/styles.js
 // Theme with CSS custom properties (--byo-*) or with ::part().
 // Parts: box, dropzone, button, primary, input, textarea, label, link,
-//        privacy, status, errors, route, choice
+//        hint, privacy, status, errors, route, choice
 
 const BASE_CSS = `
 :host{
@@ -105,7 +105,10 @@ const DATA_CSS = `
 .dz{border:1.5px dashed var(--byo-line);border-radius:12px;padding:14px;text-align:center;background:var(--byo-soft);transition:border-color .2s,background .2s}
 :host([dragging]) .dz{border-color:var(--byo-accent);background:var(--byo-accent-soft)}
 .dz strong{display:block;font-size:15px;letter-spacing:-.2px}
+.dz .hint{display:block;margin-top:2px;color:var(--byo-muted);font-size:12px}
+.dz .hint[hidden]{display:none}
 .dz .row{justify-content:center;margin-top:10px}
+.paste[hidden]{display:none}
 .paste{margin-top:10px}
 .paste label{display:block;margin-bottom:4px}
 .pr{display:flex;gap:8px;align-items:flex-end}
@@ -381,8 +384,19 @@ async function countNetworkCalls(fn, env = globalThis) {
 
 // ---- src/elements/byo-data.js
 const PRIVACY_LINE = 'Processed in your browser. Nothing is uploaded.';
+const DEFAULT_LABEL = 'Drop a CSV, JSON or NDJSON file here';
+const DEFAULT_PLACEHOLDER = 'name,score\nAda,12';
+const DEFAULT_ACCEPT = '.csv,.json,.ndjson,.jsonl,.txt,text/csv,application/json';
 
 // <byo-data sample-url="sample.csv" max-bytes="5242880"></byo-data>
+//
+//   Attributes (all optional)
+//     sample-url         adds a "Use sample data" button
+//     max-bytes          size limit, default 5 MiB
+//     label              heading of the drop zone
+//     paste-placeholder  placeholder text of the paste box
+//     accept             accept value of the file picker, also shown as a hint
+//     hide-paste         hides the paste box
 //
 //   el.validate = (data) => string[]     optional; any strings are shown as errors
 //   el.addEventListener('byo-data', (e) => e.detail)   { data, name, source, bytes }
@@ -411,14 +425,17 @@ class ByoData extends ElementBase {
       type: 'file',
       hidden: true,
       'aria-label': 'Choose a data file',
-      accept: '.csv,.json,.ndjson,.jsonl,.txt,text/csv,application/json',
+      accept: DEFAULT_ACCEPT,
     });
     this._pick = h('button', { type: 'button', part: 'button primary', class: 'primary' }, 'Choose file');
     this._sample = h('button', { type: 'button', part: 'button', hidden: !sampleUrl }, 'Use sample data');
+    this._title = h('strong', null, DEFAULT_LABEL);
+    this._hint = h('span', { class: 'hint', part: 'hint', hidden: true });
     this._dz = h(
       'div',
       { class: 'dz', part: 'dropzone', role: 'group', 'aria-label': 'Drop a data file here' },
-      h('strong', null, 'Drop a CSV, JSON or NDJSON file here'),
+      this._title,
+      this._hint,
       h('div', { class: 'row' }, this._pick, this._sample, this._file),
     );
     this._text = h('textarea', {
@@ -426,10 +443,10 @@ class ByoData extends ElementBase {
       part: 'textarea',
       rows: '2',
       spellcheck: 'false',
-      placeholder: 'name,score\nAda,12',
+      placeholder: DEFAULT_PLACEHOLDER,
     });
     this._use = h('button', { type: 'button', part: 'button' }, 'Use pasted data');
-    const paste = h(
+    this._paste = h(
       'div',
       { class: 'paste' },
       h('label', { for: 'paste', part: 'label' }, 'Or paste data'),
@@ -438,8 +455,9 @@ class ByoData extends ElementBase {
     this._privacy = h('p', { class: 'privacy', part: 'privacy' }, PRIVACY_LINE);
     this._status = h('p', { class: 'status', part: 'status', role: 'status', 'aria-live': 'polite' });
     this._errors = h('ul', { class: 'errors', part: 'errors', role: 'alert', hidden: true });
-    this._root.append(h('section', { class: 'box', part: 'box' }, this._dz, paste, this._privacy, this._status, this._errors));
+    this._root.append(h('section', { class: 'box', part: 'box' }, this._dz, this._paste, this._privacy, this._status, this._errors));
 
+    this._applyOptions();
     this._pick.addEventListener('click', () => this._file.click());
     this._file.addEventListener('change', () => {
       const f = this._file.files && this._file.files[0];
@@ -467,11 +485,23 @@ class ByoData extends ElementBase {
   }
 
   static get observedAttributes() {
-    return ['sample-url'];
+    return ['sample-url', 'label', 'paste-placeholder', 'accept', 'hide-paste'];
   }
 
-  attributeChangedCallback(name) {
-    if (name === 'sample-url' && this._sample) this._sample.hidden = !this.getAttribute('sample-url');
+  attributeChangedCallback() {
+    if (this._sample) this._applyOptions();
+  }
+
+  // Reads the display attributes. An empty or missing value restores the default.
+  _applyOptions() {
+    this._sample.hidden = !this.getAttribute('sample-url');
+    this._title.textContent = this.getAttribute('label') || DEFAULT_LABEL;
+    this._text.setAttribute('placeholder', this.getAttribute('paste-placeholder') || DEFAULT_PLACEHOLDER);
+    const accept = (this.getAttribute('accept') || '').trim();
+    this._file.setAttribute('accept', accept || DEFAULT_ACCEPT);
+    this._hint.textContent = accept ? 'Accepted: ' + accept.split(',').map((t) => t.trim()).filter(Boolean).join(', ') : '';
+    this._hint.hidden = !accept;
+    this._paste.hidden = this.hasAttribute('hide-paste');
   }
 
   clear() {
@@ -617,22 +647,25 @@ const anthropic = Object.freeze({
   testPath: '/v1/models',
 });
 
-// api.typesafe.ai sends no Access-Control-Allow-Origin header, so a browser
-// cannot call it directly. Calls go through the relay in relay/index.js.
-const typesafe = Object.freeze({
-  id: 'typesafe',
-  label: 'TypeSafe (Jev)',
-  keyPattern: '^[A-Za-z0-9._-]{16,}$',
-  docsUrl: 'https://docs.typesafe.ai',
-  mode: 'relay',
-  endpoint: 'https://api.typesafe.ai',
-  relayPath: '/api/typesafe',
+// OpenRouter answers browser preflights for /api/v1/chat/completions and
+// /api/alpha/decisions with access-control-allow-origin: * and allows the
+// Authorization, Content-Type, HTTP-Referer and X-Title headers, so the browser
+// calls it directly. One key reaches many models. GET /api/v1/key is a cheap
+// key test: it returns the key's label and limit.
+const openrouter = Object.freeze({
+  id: 'openrouter',
+  label: 'OpenRouter',
+  keyPattern: '^sk-or-v1-[A-Fa-f0-9]{64}$',
+  docsUrl: 'https://openrouter.ai/settings/keys',
+  mode: 'direct',
+  endpoint: 'https://openrouter.ai',
+  note: 'Make a key with a small credit limit for this demo, so a leaked key can only spend a little.',
   auth: Object.freeze({ header: 'authorization', prefix: 'Bearer ' }),
   headers: Object.freeze({}),
-  testPath: '/v1/models',
+  testPath: '/api/v1/key',
 });
 
-const PROVIDERS = Object.freeze({ openai, anthropic, typesafe });
+const PROVIDERS = Object.freeze({ openrouter, openai, anthropic });
 
 function getProvider(id) {
   return PROVIDERS[id] || null;
@@ -1113,6 +1146,99 @@ function toCsv(rows, columns) {
   return lines.join('\r\n') + '\r\n';
 }
 
+// ---- src/core/openrouter.js
+// OpenRouter Decisions API helper. No DOM, so it runs under node --test.
+//
+//   const { answers } = await openrouterDecide({
+//     key, state: { ... },
+//     questions: [{ id: 'tone', choices: ['formal', 'casual'] }],
+//   });
+//   answers.tone  // { type, choice, probabilities, confidence }
+//
+// The default model is TypeSafe's Jev decision model. A question may list
+// `choices` (strings, or objects with id, value or label); when it does, the
+// answer must be one of them. Without `choices`, any non-empty choice is accepted.
+
+const DECISIONS_URL = 'https://openrouter.ai/api/alpha/decisions';
+const JEV_MODEL = 'typesafe/jev-1.14';
+
+class OpenRouterError extends Error {
+  constructor(message, status = 0) {
+    super(message);
+    this.name = 'OpenRouterError';
+    this.status = status;
+  }
+}
+
+const scrub = (text, key) => (key ? String(text).split(key).join('[key]') : String(text));
+
+function choiceValues(list) {
+  return list.map((c) => (c && typeof c === 'object' ? c.id ?? c.value ?? c.label : c)).map(String);
+}
+
+function statusHint(status, model) {
+  if (status === 401) {
+    return 'OpenRouter rejected the key (HTTP 401). Check you copied all of it, or make a new one at https://openrouter.ai/settings/keys.';
+  }
+  if (status === 402) {
+    return 'OpenRouter says the key is out of credit or over its limit (HTTP 402). Add credit or raise the key limit.';
+  }
+  if (status === 404) {
+    return model.startsWith('typesafe/')
+      ? 'OpenRouter answered HTTP 404 for ' + model + '. Jev may be blocked by your OpenRouter guardrails. Check the guardrail settings for your account.'
+      : 'OpenRouter answered HTTP 404 for ' + model + '. The model name may be wrong, or your OpenRouter guardrails may block it.';
+  }
+  return '';
+}
+
+async function openrouterDecide({ key, model = JEV_MODEL, state, questions, fetch: fetchImpl } = {}) {
+  if (typeof key !== 'string' || !key.trim()) throw new TypeError('Enter an OpenRouter key.');
+  if (!Array.isArray(questions) || questions.length === 0) throw new TypeError('Give at least one question.');
+  for (const q of questions) {
+    if (!q || typeof q.id !== 'string' || !q.id) throw new TypeError('Every question needs a string id.');
+  }
+  const doFetch = fetchImpl || globalThis.fetch;
+  const apiKey = key.trim();
+  let res;
+  try {
+    res = await doFetch(DECISIONS_URL, {
+      method: 'POST',
+      headers: { authorization: 'Bearer ' + apiKey, 'content-type': 'application/json' },
+      body: JSON.stringify({ model, state, questions }),
+    });
+  } catch {
+    throw new OpenRouterError('Could not reach openrouter.ai. Check your connection.');
+  }
+  let json = null;
+  try {
+    json = await res.json();
+  } catch {
+    /* not JSON */
+  }
+  if (!res.ok) {
+    const hint = statusHint(res.status, model);
+    const detail = json?.error?.message ? ' ' + scrub(json.error.message, apiKey) : '';
+    throw new OpenRouterError(hint ? hint + detail : 'OpenRouter answered HTTP ' + res.status + '.' + detail, res.status);
+  }
+  const answers = json?.answers;
+  if (!answers || typeof answers !== 'object') throw new OpenRouterError('OpenRouter returned no answers.', res.status);
+  for (const q of questions) {
+    const a = answers[q.id];
+    const choice = a?.choice;
+    if (choice === undefined || choice === null || choice === '') {
+      throw new OpenRouterError('The model gave no choice for question "' + q.id + '".', res.status);
+    }
+    const allowed = Array.isArray(q.choices) ? choiceValues(q.choices) : null;
+    if (allowed && !allowed.includes(String(choice))) {
+      throw new OpenRouterError(
+        'The model chose "' + choice + '" for question "' + q.id + '", which is not one of: ' + allowed.join(', ') + '.',
+        res.status,
+      );
+    }
+  }
+  return { model: json.model || model, answers };
+}
+
 // ---- src/index.js
 // byo-kit: bring your own data and bring your own key, for static demos.
 
@@ -1137,9 +1263,9 @@ export {
   neutralizeFormula,
   countNetworkCalls,
   PROVIDERS,
+  openrouter,
   openai,
   anthropic,
-  typesafe,
   getProvider,
   normalizeProvider,
   checkKeyFormat,
@@ -1147,6 +1273,10 @@ export {
   requestFor,
   createKeyTest,
   hostOf,
+  openrouterDecide,
+  OpenRouterError,
+  DECISIONS_URL,
+  JEV_MODEL,
   createKeyStore,
   maskKey,
   downloadText,

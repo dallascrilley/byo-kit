@@ -1,12 +1,31 @@
 {
   "steps": [
-    { "goto": "/example/" },
-    { "wait": 300 },
-    { "click": "byo-data button:has-text(\"Use sample data\")" },
-    { "wait": 1100 },
-    { "hover": "#cols tbody tr:nth-child(5)", "hold": 300 },
-    { "type": "byo-key input[type=password]", "text": "sk-ant-demo-key-not-real-0000", "delay": 28 },
-    { "click": "byo-key button:has-text(\"Use key\")" },
-    { "wait": 1300 }
+    {
+      "goto": "/example/"
+    },
+    {
+      "wait": 300
+    },
+    {
+      "click": "byo-data button:has-text(\"Use sample data\")"
+    },
+    {
+      "wait": 1100
+    },
+    {
+      "hover": "#cols tbody tr:nth-child(5)",
+      "hold": 300
+    },
+    {
+      "type": "byo-key input[type=password]",
+      "text": "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",
+      "delay": 14
+    },
+    {
+      "click": "byo-key button:has-text(\"Use key\")"
+    },
+    {
+      "wait": 1300
+    }
   ]
 }

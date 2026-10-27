@@ -4,8 +4,19 @@ import { parseText, byteLength, checkSize, formatBytes, DEFAULT_MAX_BYTES } from
 import { countNetworkCalls } from '../core/network-guard.js';
 
 export const PRIVACY_LINE = 'Processed in your browser. Nothing is uploaded.';
+const DEFAULT_LABEL = 'Drop a CSV, JSON or NDJSON file here';
+const DEFAULT_PLACEHOLDER = 'name,score\nAda,12';
+const DEFAULT_ACCEPT = '.csv,.json,.ndjson,.jsonl,.txt,text/csv,application/json';
 
 // <byo-data sample-url="sample.csv" max-bytes="5242880"></byo-data>
+//
+//   Attributes (all optional)
+//     sample-url         adds a "Use sample data" button
+//     max-bytes          size limit, default 5 MiB
+//     label              heading of the drop zone
+//     paste-placeholder  placeholder text of the paste box
+//     accept             accept value of the file picker, also shown as a hint
+//     hide-paste         hides the paste box
 //
 //   el.validate = (data) => string[]     optional; any strings are shown as errors
 //   el.addEventListener('byo-data', (e) => e.detail)   { data, name, source, bytes }
@@ -34,14 +45,17 @@ export class ByoData extends ElementBase {
       type: 'file',
       hidden: true,
       'aria-label': 'Choose a data file',
-      accept: '.csv,.json,.ndjson,.jsonl,.txt,text/csv,application/json',
+      accept: DEFAULT_ACCEPT,
     });
     this._pick = h('button', { type: 'button', part: 'button primary', class: 'primary' }, 'Choose file');
     this._sample = h('button', { type: 'button', part: 'button', hidden: !sampleUrl }, 'Use sample data');
+    this._title = h('strong', null, DEFAULT_LABEL);
+    this._hint = h('span', { class: 'hint', part: 'hint', hidden: true });
     this._dz = h(
       'div',
       { class: 'dz', part: 'dropzone', role: 'group', 'aria-label': 'Drop a data file here' },
-      h('strong', null, 'Drop a CSV, JSON or NDJSON file here'),
+      this._title,
+      this._hint,
       h('div', { class: 'row' }, this._pick, this._sample, this._file),
     );
     this._text = h('textarea', {
@@ -49,10 +63,10 @@ export class ByoData extends ElementBase {
       part: 'textarea',
       rows: '2',
       spellcheck: 'false',
-      placeholder: 'name,score\nAda,12',
+      placeholder: DEFAULT_PLACEHOLDER,
     });
     this._use = h('button', { type: 'button', part: 'button' }, 'Use pasted data');
-    const paste = h(
+    this._paste = h(
       'div',
       { class: 'paste' },
       h('label', { for: 'paste', part: 'label' }, 'Or paste data'),
@@ -61,8 +75,9 @@ export class ByoData extends ElementBase {
     this._privacy = h('p', { class: 'privacy', part: 'privacy' }, PRIVACY_LINE);
     this._status = h('p', { class: 'status', part: 'status', role: 'status', 'aria-live': 'polite' });
     this._errors = h('ul', { class: 'errors', part: 'errors', role: 'alert', hidden: true });
-    this._root.append(h('section', { class: 'box', part: 'box' }, this._dz, paste, this._privacy, this._status, this._errors));
+    this._root.append(h('section', { class: 'box', part: 'box' }, this._dz, this._paste, this._privacy, this._status, this._errors));
 
+    this._applyOptions();
     this._pick.addEventListener('click', () => this._file.click());
     this._file.addEventListener('change', () => {
       const f = this._file.files && this._file.files[0];
@@ -90,11 +105,23 @@ export class ByoData extends ElementBase {
   }
 
   static get observedAttributes() {
-    return ['sample-url'];
+    return ['sample-url', 'label', 'paste-placeholder', 'accept', 'hide-paste'];
   }
 
-  attributeChangedCallback(name) {
-    if (name === 'sample-url' && this._sample) this._sample.hidden = !this.getAttribute('sample-url');
+  attributeChangedCallback() {
+    if (this._sample) this._applyOptions();
+  }
+
+  // Reads the display attributes. An empty or missing value restores the default.
+  _applyOptions() {
+    this._sample.hidden = !this.getAttribute('sample-url');
+    this._title.textContent = this.getAttribute('label') || DEFAULT_LABEL;
+    this._text.setAttribute('placeholder', this.getAttribute('paste-placeholder') || DEFAULT_PLACEHOLDER);
+    const accept = (this.getAttribute('accept') || '').trim();
+    this._file.setAttribute('accept', accept || DEFAULT_ACCEPT);
+    this._hint.textContent = accept ? 'Accepted: ' + accept.split(',').map((t) => t.trim()).filter(Boolean).join(', ') : '';
+    this._hint.hidden = !accept;
+    this._paste.hidden = this.hasAttribute('hide-paste');
   }
 
   clear() {
