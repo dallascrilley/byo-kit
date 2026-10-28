@@ -97,6 +97,22 @@ watch a GitHub run with `gh-axi run watch RUN_ID` or inspect its Depot run, and 
 Worker URL from the receipt. GitHub self-hosted Linux and Depot workflow
 templates are included.
 
+### A short case study with each project
+
+Generated projects include private drafts in `docs/CASE_STUDY.md` and
+`docs/CASE_STUDY_BRIEF.md`. Compare a few supported lessons, pick one worth
+reading on its own, and write fewer than 1,000 words in the author's style.
+Show a concrete example and link to the finished project. No invented incident,
+novelty, adoption or time saving is needed.
+
+After publishing the project, `npm run blog:check` checks length, placeholders
+and repository/demo links against its source-bound release receipt. It records
+a separate article artifact in the handoff. The check cannot certify the
+insight, factual claims, writing style or live links. Drafts and receipts stay
+ignored until deliberately published through the chosen destination. Community
+posting and live website changes remain separate actions. Include writing and
+editing in measured workflow time.
+
 ## Research a useful concept
 
 The stdlib Python helper gathers bounded public GitHub repository/issue evidence
