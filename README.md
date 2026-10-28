@@ -106,12 +106,16 @@ Show a concrete example and link to the finished project. No invented incident,
 novelty, adoption or time saving is needed.
 
 After publishing the project, `npm run blog:check` checks length, placeholders
-and repository/demo links against its source-bound release receipt. It records
-a separate article artifact in the handoff. The check cannot certify the
-insight, factual claims, writing style or live links. Drafts and receipts stay
-ignored until deliberately published through the chosen destination. Community
-posting and live website changes remain separate actions. Include writing and
-editing in measured workflow time.
+and repository/demo links against its source-bound release receipt. Drafts and
+receipts stay ignored. The default is to publish the reviewed article on the
+owner's website, then run
+`npm run blog:record -- --published-url https://your.site/writing/slug`.
+That command checks the live page title and repository link, records the URL,
+and adds or updates a case-study backlink in the project README. Article
+publication and the README backlink have separate handoff statuses. The check
+cannot certify the insight, factual claims or writing style. Community posts
+remain separately authorized. Include writing and editing in measured
+workflow time.
 
 ## Research a useful concept
 
