@@ -1,0 +1,9 @@
+Concept selection end-to-end proof, 2026-10-28
+Synthetic inputs only; this transcript does not claim live research or an implemented feature.
+brief: private mode 600; blank draft created
+compare: capability first; two distinct concepts; no scores; private context absent
+Timely hook: Synthetic event and later observation. | event/release date: 2020-01-02 | checked_at: 2026-10-28 | https://example.invalid/release
+select -> scaffold -> check: passed; literal private employer absent from exported concept and generated files
+existing concept manifest -> scaffold -> check: passed
+privacy negative: declared private employer in printed evidence rejected without disclosure
+Limits: quality, novelty, live research and actual job fit require human/agent review; no publication or application occurred.

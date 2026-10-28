@@ -4,6 +4,8 @@ Keep this working document private. The article should reward a reader who never
 
 ## Choose the angle
 
+Before building, record a hypothesis in the concept proof plan. After building, compare it with the baseline, acceptance examples and failure results. Name the observation that changed or confirmed the idea and link its evidence. Revise or discard an unsupported angle. Do not turn the selection rationale into a finding. Project results can demonstrate a capability; they cannot establish professional tenure or satisfy an employment-duration requirement.
+
 Compare a few plausible takes before writing. Include one surprising behavior or failure, one decision with a useful tradeoff, and another lesson the work actually supports. State what a reader can do differently after reading each. Choose the strongest supported angle, not the loudest title. Do not force a contrarian claim.
 
 Selected insight: TODO_CASE_STUDY
@@ -12,6 +14,11 @@ Concrete example or demonstration: TODO_CASE_STUDY
 Why the lesson matters beyond this project: TODO_CASE_STUDY
 
 ## Check the evidence
+
+Baseline and conditions: TODO_CASE_STUDY
+Observed result and source revision: TODO_CASE_STUDY
+What changed from the original hypothesis: TODO_CASE_STUDY
+Limits and counterexample: TODO_CASE_STUDY
 
 For each consequential claim, record the exact source revision, test/result or reproducible command. Distinguish observations, illustrative inputs, inferences and opinions. Check prior art before claiming novelty. A benchmark needs its baseline and conditions. Do not turn development speed into production reliability, a synthetic example into a customer story, or interest into adoption. Keep secrets, customer data, job applications and retrieved writing samples out of public material.
 

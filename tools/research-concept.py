@@ -146,9 +146,12 @@ def research(technology, pain, *, patterns=(), issue_repos=(), subreddit=None, l
             'technology': technology, 'pain': pain, 'sources': sources, 'unique_records': list(unique.values()),
             'coverage': 'complete' if all(s['status'] == 'available' for s in sources) else 'partial',
             'selection': 'unreviewed',
-            'next': ['Read original reports and current alternatives, including closed-issue resolution.',
-                     'Compare three concepts: extend/contribute/wrap/new/skip; explain the useful difference.',
-                     'Record a <10 second storyboard and real acceptance/failure examples before building.'],
+            'next': ['Define the job capability and observable evidence first in a private selection brief; never send job or employer text to search.',
+                     'Broaden real problems and industries after fixing the capability; read originals and current alternatives, including closed-issue resolution.',
+                     'Compare distinct concepts for usefulness, demo quality and a result-backed case study; do not pad to a fixed count or require scores.',
+                     'A timely problem is an advantage, not a prerequisite. Record the event/release date separately from checked_at; use unknown if unavailable. checked_at is not recency evidence.',
+                     'Choose extend/contribute/wrap/new or skip; record acceptance/failure examples and a <10 second storyboard.',
+                     'Treat the proposed lesson as a hypothesis until results earn it; project evidence cannot establish professional tenure.'],
             'limits': ['Keyword searches are discovery only; no search result proves an absent competitor or unmet need.',
                        'An empty or blocked source is not evidence of no demand.',
                        'No selected concept or career fact is created by this command.']}
@@ -165,7 +168,10 @@ def save_new(path, report):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--technology', required=True)
+    scope = parser.add_mutually_exclusive_group(required=True)
+    scope.add_argument('--technology', help='Legacy technology-focused discovery')
+    scope.add_argument('--capability', help='General public capability chosen from the job gap, never a job description or employer')
+    parser.add_argument('--domain', help='Optional problem/industry context after choosing the capability')
     parser.add_argument('--pain', required=True, help='Short work/problem terms, not a full job description')
     parser.add_argument('--pattern', action='append', choices=PATTERNS, default=[])
     parser.add_argument('--issue-repo', action='append', default=[])
@@ -176,8 +182,16 @@ def main(argv=None):
     parser.add_argument('--out', help='New dated JSON file; refuses to overwrite')
     args = parser.parse_args(argv)
     try:
-        result = research(args.technology, args.pain, patterns=args.pattern, issue_repos=args.issue_repo,
+        if args.domain and not args.capability:
+            raise ValueError('--domain requires --capability; choose the capability first.')
+        if args.capability is not None and not args.capability.strip():
+            raise ValueError('Capability must be nonempty.')
+        technology = args.technology or ' '.join(filter(None, [args.capability, args.domain]))
+        result = research(technology, args.pain, patterns=args.pattern, issue_repos=args.issue_repo,
                           subreddit=args.subreddit, limit=args.limit, reddit_route=args.reddit_route)
+        if args.capability:
+            result['research_scope'] = {'capability': args.capability, 'domain': args.domain,
+                                        'status': 'discovery_only', 'professional_tenure': 'not_demonstrated'}
         if args.out:
             save_new(args.out, result)
             print(json.dumps({'path': args.out, 'coverage': result['coverage'], 'records': len(result['unique_records'])}))

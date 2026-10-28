@@ -2,6 +2,10 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
+from contextlib import redirect_stdout, redirect_stderr
+import io
+import json
 from urllib.error import HTTPError
 
 spec = importlib.util.spec_from_file_location('research', Path(__file__).resolve().parents[1] / 'tools/research-concept.py')
@@ -10,6 +14,37 @@ spec.loader.exec_module(module)
 
 
 class ResearchTests(unittest.TestCase):
+    def test_capability_first_cli_and_legacy_technology_route(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'research.json'
+            report = {'coverage': 'partial', 'unique_records': []}
+            with patch.object(module, 'research', return_value=report.copy()) as research, redirect_stdout(io.StringIO()):
+                module.main(['--capability', 'integrity diagnosis', '--domain', 'transit', '--pain', 'overlap', '--out', str(output)])
+            research.assert_called_once_with('integrity diagnosis transit', 'overlap', patterns=[], issue_repos=[], subreddit=None, limit=3, reddit_route='browser')
+            saved = json.loads(output.read_text())
+            self.assertEqual(saved['research_scope']['capability'], 'integrity diagnosis')
+            self.assertEqual(saved['research_scope']['professional_tenure'], 'not_demonstrated')
+            with patch.object(module, 'research', return_value=report.copy()) as research, redirect_stdout(io.StringIO()):
+                module.main(['--technology', 'sqlite', '--pain', 'collision'])
+            self.assertEqual(research.call_args.args, ('sqlite', 'collision'))
+
+    def test_capability_scope_validation_happens_before_network(self):
+        for args in [ ['--capability', ' ', '--pain', 'overlap'],
+                      ['--technology', 'sqlite', '--domain', 'transit', '--pain', 'overlap'],
+                      ['--technology', 'sqlite', '--capability', 'diagnosis', '--pain', 'overlap'] ]:
+            with patch.object(module, 'research') as research, redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                module.main(args)
+            research.assert_not_called()
+
+    def test_discovery_guidance_does_not_force_trends_counts_or_tenure_claims(self):
+        result = module.research('diagnosis', 'overlap', fetch=lambda _: {'items': []})
+        guidance = ' '.join(result['next'])
+        self.assertIn('job capability', guidance)
+        self.assertIn('not a prerequisite', guidance)
+        self.assertIn('hypothesis', guidance)
+        self.assertNotIn('Compare three', guidance)
+        self.assertEqual(result['selection'], 'unreviewed')
+
     def test_partial_source_never_becomes_no_demand(self):
         def fetch(url):
             if 'reddit.com' in url:

@@ -4,11 +4,15 @@ import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { normalize, validate, privateField, publicConcept, safeName } from './concept.mjs';
 import { projectPlan, readme } from './scaffold-docs.mjs';
+import { selectionCommand } from './selection.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const USAGE = `byo-kit — scaffold a local-first project from a concept manifest
 
 Usage:
+  node scripts/byo.mjs brief --out <private-selection.json>
+  node scripts/byo.mjs compare <private-selection.json>
+  node scripts/byo.mjs select <private-selection.json> --out <public-concept.json>
   node scripts/byo.mjs scaffold <concept.json|-> --out <directory>
   node scripts/byo.mjs check <project-directory>
 
@@ -102,7 +106,7 @@ function check(dir) {
   if (!existsSync(manifestPath)) die(`not a generated project: ${manifestPath} is missing`);
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
   const sensitive = privateField(manifest); if (sensitive) die(`public concept contains a private or credential field at ${sensitive}`);
-  const allowed = new Set(['name', 'title', 'problem', 'user', 'standout', 'demo_steps', 'kind', 'ai', 'prior_art', 'description', 'sample_data', 'features']);
+  const allowed = new Set(['name', 'title', 'problem', 'user', 'standout', 'demo_steps', 'kind', 'ai', 'prior_art', 'description', 'sample_data', 'features', 'proof_plan']);
   const extra = Object.keys(manifest).find((key) => !allowed.has(key)); if (extra) die(`public concept contains unsupported field ${extra}`);
   const errors = validate(normalize(manifest));
   if (errors.length) die(errors.join('; '));
@@ -113,7 +117,10 @@ function check(dir) {
 
 const args = argsOf(process.argv.slice(2));
 if (!args._.length || args._[0] === 'help' || args.help) { console.log(USAGE); process.exit(0); }
-if (args._[0] === 'scaffold') {
+if (['brief', 'compare', 'select'].includes(args._[0])) {
+  try { console.log(selectionCommand(args._[0], args._[1], args.out)); }
+  catch (error) { die(['EEXIST', 'ENOENT', 'EACCES'].includes(error.code) ? 'file unavailable or output already exists; no overwrite performed' : error.message); }
+} else if (args._[0] === 'scaffold') {
   if (!args._[1] || !args.out || args.out === true) die('scaffold needs a concept file and --out directory');
   const started = performance.now(); const source = args._[1] === '-' ? readFileSync(0, 'utf8') : readFileSync(resolve(args._[1]), 'utf8'); const raw = JSON.parse(source);
   const out = scaffold(raw, args.out); const elapsed = Math.round(performance.now() - started);

@@ -119,6 +119,13 @@ workflow time.
 
 ## Research a useful concept
 
+For a job-driven project, start with the private selection workflow in
+[docs/concept-selection.md](docs/concept-selection.md). Fix the capability and
+evidence first, then widen real problems and industries. Timeliness is an
+advantage, not a requirement. Compare distinct approaches for usefulness,
+demo quality and a possible case-study lesson. Export only the selected public
+concept to the existing scaffold; older concept manifests still work directly.
+
 The stdlib Python helper gathers bounded public GitHub repository/issue evidence
 and reads visible Reddit search results through an existing signed-in Chrome
 session. It records source URLs, observation times and incomplete coverage; it

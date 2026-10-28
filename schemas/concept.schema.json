@@ -37,6 +37,24 @@
       "additionalProperties": true
     },
     "description": { "type": "string" },
+    "proof_plan": {
+      "description": "Optional public capability proof plan. Hypotheses are not findings; project evidence cannot establish professional tenure. Never include job or employer context.",
+      "type": "object",
+      "required": ["capability", "baseline", "acceptance", "case_study_hypothesis"],
+      "properties": {
+        "capability": { "type": "string", "minLength": 1 },
+        "baseline": { "type": "string", "minLength": 1 },
+        "case_study_hypothesis": { "type": "string", "minLength": 1 },
+        "acceptance": { "type": "array", "minItems": 1, "items": {
+          "type": "object", "required": ["input", "expected", "failure"],
+          "properties": {
+            "input": { "type": "string", "minLength": 1 },
+            "expected": { "type": "string", "minLength": 1 },
+            "failure": { "type": "string", "minLength": 1 }
+          }, "additionalProperties": false
+        } }
+      }, "additionalProperties": false
+    },
     "sample_data": { "type": "array", "items": { "type": "object" } },
     "features": { "type": "array", "items": { "type": "string" } },
     "openrouter": { "type": "boolean", "default": false }

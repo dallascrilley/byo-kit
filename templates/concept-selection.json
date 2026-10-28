@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "job_gap": {
+    "requirement": "TODO: private requirement from the job; never export this text",
+    "capability": "TODO: general capability and observable behavior to demonstrate",
+    "evidence_needed": "TODO: observable artifact, result and failure boundary required before choosing a problem",
+    "context": { "employer": "", "role": "", "posting_url": "", "notes": "" }
+  },
+  "private_terms": [],
+  "candidates": [
+    {
+      "id": "first-approach",
+      "mechanism": "TODO: concrete approach, not just a technology or format",
+      "gap_fit": "TODO: how the acceptance example demonstrates the capability and where it falls short",
+      "usefulness": "TODO: who can do what better than the current alternative",
+      "demo_quality": "TODO: real input, visible result and failure within a short demo",
+      "case_study_potential": "TODO: what a baseline or failure experiment could teach; no finding yet",
+      "evidence": [{ "url": "https://example.invalid/replace", "checked_at": "YYYY-MM-DD", "finding": "TODO: read the original and current resolution" }],
+      "concept": {
+        "name": "TODO: public name",
+        "problem": "TODO: a real problem in any relevant industry",
+        "user": "TODO: concrete user",
+        "standout": "TODO: useful behavior beyond the current alternative",
+        "demo_steps": ["TODO: input and visible result"],
+        "prior_art": { "decision": "extend", "references": [], "rationale": "TODO: compare extend, contribute, wrap or new; skip if none is useful" },
+        "proof_plan": {
+          "capability": "TODO: same general capability as job_gap.capability",
+          "baseline": "TODO: current alternative and comparison conditions",
+          "acceptance": [{ "input": "TODO: reproducible input", "expected": "TODO: observable result", "failure": "TODO: failure input and expected safe behavior" }],
+          "case_study_hypothesis": "TODO: question to investigate, revise after results"
+        }
+      }
+    },
+    {
+      "id": "different-approach",
+      "mechanism": "TODO: genuinely different workflow or mechanism",
+      "gap_fit": "TODO: capability evidence and limits",
+      "usefulness": "TODO: compare with current practice",
+      "demo_quality": "TODO: visible behavior from a real fixture",
+      "case_study_potential": "TODO: question a result could answer",
+      "evidence": [],
+      "concept": {
+        "name": "TODO: public name", "problem": "TODO: broaden the problem search", "user": "TODO: user",
+        "standout": "TODO: behavior", "demo_steps": ["TODO: storyboard"],
+        "prior_art": { "decision": "wrap", "references": [], "rationale": "TODO: reason" },
+        "proof_plan": {
+          "capability": "TODO: same chosen capability", "baseline": "TODO: alternative",
+          "acceptance": [{ "input": "TODO", "expected": "TODO", "failure": "TODO" }],
+          "case_study_hypothesis": "TODO: investigate after building"
+        }
+      }
+    }
+  ],
+  "decision": { "selected": null, "rationale": "TODO: choose after comparison or skip building", "tradeoffs": [] }
+}
